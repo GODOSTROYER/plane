@@ -59,6 +59,15 @@ class Cursor:
             raise ValueError(f"Invalid cursor format: {e}")
 
 
+class RowPreservingList(list):
+    """Eager rows from a one-to-one page projection.
+
+    A paginator callback may opt in only when it preserves the input row
+    count. Ordinary lists, grouping, filtering and expanding transformations
+    retain the legacy count path. This remains a list on the response wire.
+    """
+
+
 class CursorResult(Sequence):
     def __init__(self, results, next, prev, hits=None, max_hits=None):
         self.results = results
@@ -157,7 +166,10 @@ class OffsetPaginator:
         if cursor.value != limit and cursor.is_prev:
             results = results[-(limit + 1) :]
 
-        total_count = self.total_count_queryset.count() if self.total_count_queryset else queryset.count()
+        # QuerySet truthiness fetches every matching model. A supplied empty
+        # count queryset is also authoritative; only None selects the fallback.
+        count_queryset = self.total_count_queryset if self.total_count_queryset is not None else queryset
+        total_count = count_queryset.count()
 
         # Check if there are more results available after the current page
 
@@ -715,6 +727,13 @@ class BasePaginator:
         else:
             results = cursor_result.results
 
+        # Only explicitly row-preserving projections can supply this count.
+        # Capture it before a controller mutates/wraps the returned list. Do
+        # not infer row counts from groups or arbitrary callback output.
+        page_count = None
+        if not group_by_field_name and not sub_group_by_field_name and isinstance(results, RowPreservingList):
+            page_count = len(results)
+
         if group_by_field_name:
             results = paginator.process_results(results=results)
 
@@ -734,7 +753,7 @@ class BasePaginator:
                 "prev_cursor": str(cursor_result.prev),
                 "next_page_results": cursor_result.next.has_results,
                 "prev_page_results": cursor_result.prev.has_results,
-                "count": cursor_result.__len__(),
+                "count": cursor_result.__len__() if page_count is None else page_count,
                 "total_pages": cursor_result.max_hits,
                 "total_results": cursor_result.hits,
                 "extra_stats": extra_stats,
