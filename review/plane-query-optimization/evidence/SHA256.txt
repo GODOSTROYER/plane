@@ -1,0 +1,2 @@
+SHA256  plane-evidence-c70e8050e728-linux-validated.zip
+553d5caf5624f4dbc6f179c92ff8c18fa2d7a21dae3da4dbe7ddef4a3d144e19
