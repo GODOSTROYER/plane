@@ -20,10 +20,10 @@ The review branch also includes the changed application view and regression test
 
 ## Snapshot and validation
 
-- Proposed contribution commit: c70e8050e728a9cd5cbb5549eb931b937c7e3e8c
+- Prepared local contribution snapshot: c70e8050e728a9cd5cbb5549eb931b937c7e3e8c; the same source change is published at the normal source paths on this review branch.
 - Production implementation commit: 9227478e0cdb08165ba55e8189872cdb9b99b5e6
 - Upstream base: makeplane/plane preview at 7466675e471efe1c96b122615f7a0d30c9b2eb05
-- The user's change is the sole authorship on the proposed contribution commit. The packet commit is separate documentation/evidence packaging.
+- The prepared contribution snapshot lists Arnav Bule as its sole author. Review-packet and source-publication commits are separate; no upstream PR was created.
 - Backend suite: 732 passed in both the repository's Linux Docker Compose environment and the Windows test environment; all 32 expansion regression cases passed. Four additional endpoint checks passed. Changed-file lint, formatting, copyright, Django system check, and migration-drift checks passed.
 - The full run emitted 92 pre-existing dependency warnings: 4 from factory_boy cleanup behavior and 88 from openpyxl's deprecated datetime.utcnow() usage. Neither source is in the changed files, and no warning caused a test failure.
 - Hosted GitHub CI and maintainer approval are still pending; no PR to makeplane/plane has been opened.

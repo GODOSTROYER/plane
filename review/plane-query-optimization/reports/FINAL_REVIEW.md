@@ -8,7 +8,7 @@ The production change batches only the requested project user expansions that su
 
 The contribution is a follow-up to the project-list expansion N+1 work explicitly left out of [Plane PR #9717](https://github.com/makeplane/plane/pull/9717). The changed application view and regression module are also included at their normal source paths in this review branch: [project.py](https://github.com/GODOSTROYER/plane/blob/plane-query-review-20261006/apps/api/plane/api/views/project.py) and [test_project_list_expansion_queries.py](https://github.com/GODOSTROYER/plane/blob/plane-query-review-20261006/apps/api/plane/tests/contract/api/test_project_list_expansion_queries.py). The complete source diff is also available in [the patch](../patches/project-list-expansions.patch).
 
-The proposed contribution commit is c70e8050e728a9cd5cbb5549eb931b937c7e3e8c, based on makeplane/plane:preview at 7466675e471efe1c96b122615f7a0d30c9b2eb05. It changes only the project-list view and its regression tests: 399 additions and 3 deletions.
+The prepared local contribution snapshot is c70e8050e728a9cd5cbb5549eb931b937c7e3e8c, based on makeplane/plane:preview at 7466675e471efe1c96b122615f7a0d30c9b2eb05; the same source change is published at the normal source paths on this review branch. The source change is limited to the project-list view and its regression tests.
 
 ## Verification
 
