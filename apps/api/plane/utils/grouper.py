@@ -24,6 +24,8 @@ from plane.db.models import (
 )
 from typing import Optional, Dict, Tuple, Any, Union, List
 
+from plane.utils.paginator import RowPreservingList
+
 
 def issue_queryset_grouper(
     queryset: QuerySet[Issue],
@@ -138,7 +140,11 @@ def issue_on_results(
         original_list.append(sub_group_by)
 
     required_fields.extend(original_list)
-    return list(issues.values(*required_fields))
+    # The ungrouped projection includes the issue ID and scalar/array fields:
+    # it preserves page rows. Reuse its length instead of hydrating the original
+    # model queryset just for response metadata. Grouped rows keep their path.
+    result_type = list if group_by or sub_group_by else RowPreservingList
+    return result_type(issues.values(*required_fields))
 
 
 def issue_group_values(
