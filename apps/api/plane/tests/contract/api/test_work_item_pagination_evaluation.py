@@ -71,7 +71,7 @@ def test_http_page_hydration_is_bounded_by_returned_items(
 ):
     project, _ = pagination_project
     client = api_key_client if surface == "public" else session_client
-    params = {"per_page": 4, "cursor": f"4:{page_number}:0", "order_by": "name"}
+    params = {"per_page": 4, "cursor": f"4:{page_number}:0", "order_by": "sequence_id"}
     if surface == "public":
         params["fields"] = "id,name"
     url = list_url(surface, workspace, project)
@@ -95,7 +95,7 @@ def test_http_cursor_round_trip_preserves_order_and_count(
     project, _ = pagination_project
     client = api_key_client if surface == "public" else session_client
     url = list_url(surface, workspace, project)
-    params = {"per_page": 4, "order_by": "name"}
+    params = {"per_page": 4, "order_by": "sequence_id"}
     first = fetch_page(client, url, params)
     second = fetch_page(client, url, {**params, "cursor": first["next_cursor"]})
     previous = fetch_page(client, url, {**params, "cursor": second["prev_cursor"]})
@@ -120,18 +120,18 @@ def test_hidden_model_states_and_other_workspace_do_not_enter_totals(
     foreign_project = Project.objects.create(workspace=other, name="Foreign", identifier="FG")
     Issue.objects.create(workspace=other, project=foreign_project, name="Foreign private issue")
     client = api_key_client if surface == "public" else session_client
-    body = fetch_page(client, list_url(surface, workspace, project), {"per_page": 4, "order_by": "name"})
+    body = fetch_page(client, list_url(surface, workspace, project), {"per_page": 4, "order_by": "sequence_id"})
     assert body["total_count"] == body["total_results"] == 9
     assert body["count"] == 4
     assert all(row["name"].startswith("Visible ") for row in body["results"])
 
 
-def test_app_legacy_filter_applies_to_rows_and_count(
-    workspace, pagination_project, pagination_issues, session_client
-):
+def test_app_legacy_filter_applies_to_rows_and_count(workspace, pagination_project, pagination_issues, session_client):
     project, _ = pagination_project
     body = fetch_page(
-        session_client, list_url("app", workspace, project), {"per_page": 4, "priority": "high", "order_by": "name"}
+        session_client,
+        list_url("app", workspace, project),
+        {"per_page": 4, "priority": "high", "order_by": "sequence_id"},
     )
     assert body["total_count"] == 5
     assert body["count"] == 4
@@ -170,7 +170,7 @@ def test_app_grouped_metadata_counts_rows_not_group_containers(
     subgroup, workspace, pagination_project, pagination_issues, session_client
 ):
     project, _ = pagination_project
-    params = {"per_page": 2, "group_by": "priority", "order_by": "name"}
+    params = {"per_page": 2, "group_by": "priority", "order_by": "sequence_id"}
     if subgroup:
         params["sub_group_by"] = "state_id"
     body = fetch_page(session_client, list_url("app", workspace, project), params)
@@ -187,9 +187,7 @@ def test_app_grouped_metadata_counts_rows_not_group_containers(
 
 
 @pytest.mark.parametrize("surface", ["public", "app"])
-def test_empty_project_returns_zero_metadata(
-    surface, workspace, pagination_project, api_key_client, session_client
-):
+def test_empty_project_returns_zero_metadata(surface, workspace, pagination_project, api_key_client, session_client):
     project, _ = pagination_project
     client = api_key_client if surface == "public" else session_client
     body = fetch_page(client, list_url(surface, workspace, project), {"per_page": 4})
@@ -214,15 +212,13 @@ def test_public_nonmember_token_does_not_expose_project_total(
 
 
 @pytest.mark.django_db(transaction=True, databases="__all__")
-def test_public_work_item_page_over_real_tcp(
-    plane_server, api_token, workspace, pagination_project, pagination_issues
-):
+def test_public_work_item_page_over_real_tcp(plane_server, api_token, workspace, pagination_project, pagination_issues):
     """Socket smoke test; not a latency benchmark or a production deployment."""
     project, _ = pagination_project
     response = requests.get(
         plane_server.url + list_url("public", workspace, project),
         headers={"X-API-Key": api_token.token},
-        params={"per_page": 4, "fields": "id,name", "order_by": "name"},
+        params={"per_page": 4, "fields": "id,name", "order_by": "sequence_id"},
         timeout=10,
     )
     assert response.status_code == 200, response.text

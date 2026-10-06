@@ -175,6 +175,7 @@ def test_transformed_cardinality_does_not_replace_raw_page_count(user_ids, kind)
 @pytest.mark.parametrize("callback_kind", ["none", "passthrough", "serialize"])
 def test_raw_or_serialized_page_is_fetched_only_once(user_ids, callback_kind):
     page = fresh_users(user_ids)[:4]
+
     def passthrough(rows):
         return rows
 
@@ -206,7 +207,9 @@ def test_grouped_annotation_count_keeps_raw_queryset_cardinality(user_ids):
 
 
 def test_window_filtered_page_is_counted_without_hydration(user_ids):
-    raw = fresh_users(user_ids).annotate(position=Window(RowNumber(), order_by=F("id").asc())).filter(position__lte=2)[:2]
+    raw = (
+        fresh_users(user_ids).annotate(position=Window(RowNumber(), order_by=F("id").asc())).filter(position__lte=2)[:2]
+    )
     with mock.patch.object(User, "from_db", wraps=User.from_db) as hydrate:
         response = BasePaginator().paginate(
             request(), paginator=StaticPaginator(raw), on_results=lambda rows: list(rows.values("id", "position"))
@@ -247,9 +250,7 @@ def test_locking_page_still_acquires_and_releases_row_locks(user_ids):
     with ThreadPoolExecutor(max_workers=1) as executor:
         with transaction.atomic(using="default"):
             raw = fresh_users(user_ids).select_for_update()[:9]
-            response = BasePaginator().paginate(
-                request(), paginator=StaticPaginator(raw), on_results=lambda _: []
-            )
+            response = BasePaginator().paginate(request(), paginator=StaticPaginator(raw), on_results=lambda _: [])
             assert response.data["count"] == 9
             assert executor.submit(try_lock).result(timeout=10) == "locked"
         assert executor.submit(try_lock).result(timeout=10) == "acquired"

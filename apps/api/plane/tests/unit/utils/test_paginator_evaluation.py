@@ -139,9 +139,7 @@ def test_previous_cursor_with_unchanged_page_size_is_preserved():
 def test_callback_output_cardinality_is_not_used_for_page_count(transformed):
     rows = _queryset()
     callback = mock.Mock(return_value=transformed)
-    response = BasePaginator().paginate(
-        _request(), paginator=_StaticPaginator(_result(rows)), on_results=callback
-    )
+    response = BasePaginator().paginate(_request(), paginator=_StaticPaginator(_result(rows)), on_results=callback)
     callback.assert_called_once_with(rows)
     assert response.data["results"] is transformed
     assert response.data["count"] == 4
@@ -179,9 +177,7 @@ def test_group_container_count_is_not_confused_with_raw_row_count():
 @pytest.mark.parametrize("callback", [None, lambda rows: rows])
 def test_raw_queryset_response_keeps_the_single_evaluation_path(callback):
     rows = _queryset()
-    response = BasePaginator().paginate(
-        _request(), paginator=_StaticPaginator(_result(rows)), on_results=callback
-    )
+    response = BasePaginator().paginate(_request(), paginator=_StaticPaginator(_result(rows)), on_results=callback)
     assert response.data["results"] is rows
     assert response.data["count"] == 4
     rows.count.assert_not_called()
@@ -234,9 +230,7 @@ def test_cursor_result_sequence_contract_itself_is_unchanged():
 def test_locking_queryset_keeps_its_evaluation_semantics():
     rows = _queryset()
     rows.query.select_for_update = True
-    response = BasePaginator().paginate(
-        _request(), paginator=_StaticPaginator(_result(rows)), on_results=lambda _: []
-    )
+    response = BasePaginator().paginate(_request(), paginator=_StaticPaginator(_result(rows)), on_results=lambda _: [])
     assert response.data["count"] == 4
     rows.count.assert_not_called()
     rows.__len__.assert_called_once_with()
@@ -246,9 +240,7 @@ def test_unsliced_queryset_keeps_ordering_sensitive_length_semantics():
     rows = _queryset()
     rows.query.is_sliced = False
     rows.count.return_value = 1
-    response = BasePaginator().paginate(
-        _request(), paginator=_StaticPaginator(_result(rows)), on_results=lambda _: []
-    )
+    response = BasePaginator().paginate(_request(), paginator=_StaticPaginator(_result(rows)), on_results=lambda _: [])
     assert response.data["count"] == 4
     rows.count.assert_not_called()
     rows.__len__.assert_called_once_with()

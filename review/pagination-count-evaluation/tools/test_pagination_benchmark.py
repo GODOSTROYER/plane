@@ -28,8 +28,10 @@ from unittest import mock
 from uuid import uuid4
 
 import django
+from django.conf import settings
 from django.core.cache import cache
 from django.db import connections
+from django.test import override_settings
 import pytest
 from rest_framework.test import APIClient
 
@@ -71,6 +73,7 @@ def quantile(values, fraction):
     return values[low] + (values[high] - values[low]) * (index - low)
 
 
+@override_settings(DEBUG=False)
 def test_pagination_request_stack_benchmark():
     count = int(os.environ.get("PLANE_BENCH_ROWS", "1000"))
     body_bytes = int(os.environ.get("PLANE_BENCH_BODY_BYTES", "4096"))
@@ -130,6 +133,8 @@ def test_pagination_request_stack_benchmark():
         "seed": 20261006, "rows": count, "body_bytes_per_representation": body_bytes,
         "page_size": 20, "trials": trials, "python": platform.python_version(),
         "django": django.get_version(), "postgresql": postgres,
+        "debug": settings.DEBUG, "sql_capture_during_timings": False,
+        "api_key_throttle_history_reset_before_public_requests": True,
         "baseline_sha256": hashlib.sha256(baseline.encode()).hexdigest(),
         "candidate_sha256": hashlib.sha256(Path(live.__file__).read_bytes()).hexdigest(),
         "surfaces": {},
@@ -137,7 +142,7 @@ def test_pagination_request_stack_benchmark():
     with mock.patch("plane.app.views.issue.base.recent_visited_task.delay"):
         for surface, client in (("public", public_client), ("app", app_client)):
             url = f"/api{'/v1' if surface == 'public' else ''}/workspaces/{workspace.slug}/projects/{project.pk}/issues/"
-            params = {"per_page": 20, "order_by": "name"}
+            params = {"per_page": 20, "order_by": "sequence_id"}
             if surface == "public":
                 params["fields"] = "id,name"
 

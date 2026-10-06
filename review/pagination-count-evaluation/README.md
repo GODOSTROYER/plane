@@ -1,33 +1,35 @@
-# Pagination optimization — fork-only build/test packet
+# Pagination count optimization — validation packet
 
-**Draft candidate for `GODOSTROYER/plane:preview`, on `perf/pagination-count-evaluation`. Do not modify or submit a PR to the official repository.**
+Start with **[the completed validation report](VALIDATION.md)** and **[reproduction commands](REPRODUCE.md)**. The application and tests are already applied at their normal repository paths; do not reapply the historical patches.
 
-Start with **[HANDOFF.md](HANDOFF.md)**. The application change and three regression files are already installed at their normal `apps/api` paths on this branch. Do not reapply the patches or run the new-branch preparation script against this branch.
+## Verified on 6 October 2026
 
-## Verification boundary
+- 800 backend tests passed in the repository's Linux Docker/PostgreSQL stack, including all 100 new cases.
+- Pristine production source with the same tests: 33 new regression failures, 767 passes, zero errors. All 700 existing tests passed.
+- 105 focused tests passed; a separate integration with upstream #9948 passed 116 tests.
+- Changed-file lint/formatting, Django system checks, and migration checks passed.
+- Six benchmark workloads passed on public/app endpoints with identical responses across baseline, count-source-only, and combined implementations.
 
-The supplied candidate contains **100 authored parameterized cases**: 57 unit/orchestration, 22 ORM, and 21 request-stack/TCP. The preparation environment ran 57 offline checks with framework doubles: candidate 57 passed; original 12 failed and 45 passed; eight mutations detected. Those are not Django or PostgreSQL integration results.
+The 92 dependency warnings and three unrelated unused-import findings also occur on the pristine base. Hosted checks and maintainer review are separate. Production traffic, real replicas, concurrent throughput, and process peak RSS were not measured.
 
-During publication, the complete original paginator was verified against Git blob `2082041f1ac641ade4aa87eb9f0d9c581233e333`, the supplied combined patch applied/reversed cleanly in a file-only temporary Git repository, and the 57 offline checks passed again using that full source as input. Published candidate blob: `9909da0a627412e76d0a0ac25573517544bb9c32`. A subsequent standalone-packet run also detected all eight mutations and verified staged/combined patch application; see [publication validation](evidence/publication-validation.json).
+## Current evidence
 
-**Still pending:** real Django/DRF tests, PostgreSQL/HTTP/TCP tests, Ruff, full backend suite, migration/system checks, hosted CI, and performance measurements. No speedup or production-memory saving is claimed.
+- [Validation and design assessment](VALIDATION.md)
+- [Reproduction commands](REPRODUCE.md)
+- [Complete benchmark table](evidence/linux-20261006/BENCHMARKS.md)
+- [Machine-readable summary](evidence/linux-20261006/summary.json)
+- [Raw logs, trials, SQL, plans, and tested sources](evidence/linux-20261006/linux-validation.zip)
+- [Source/member manifest](evidence/linux-20261006/manifest.json) and [checksums](evidence/linux-20261006/SHA256SUMS)
+- [Application-only patch](evidence/linux-20261006/application.patch)
+- [Upstream PR description](PR_DRAFT.md)
+- [Corrected real-stack benchmark](tools/test_pagination_benchmark.py)
 
-## Important design distinction
+The official submission uses a separate application-only branch. This fork review branch retains the evidence packet. Existing upstream PRs #9947/#9952, fork PR #2, and the fork's preview were not changed.
 
-Fork [PR #2](https://github.com/GODOSTROYER/plane/pull/2) uses an opt-in `RowPreservingList` design. This is the separate supplied **guarded SQL-count candidate**. Neither approach has been selected by real-stack performance evidence in this publication. Leave #2 untouched; compare in isolated local worktrees and do not merge both blindly.
+## Historical material
 
-## Contents
+[HANDOFF.md](HANDOFF.md), [RESEARCH_AND_DECISION.md](RESEARCH_AND_DECISION.md), [PUBLICATION.md](PUBLICATION.md), and the original [evidence guide](evidence/README.md) describe the initial offline preparation and earlier publication scope. Their pending-validation statements are superseded by VALIDATION.md. The subsequent explicit instruction authorizes preparing an upstream draft; no merge is authorized.
 
-- [Build/test handoff](HANDOFF.md): checkout, services, real tests, fail-before proof, gates, benchmarks, and fork-only reporting.
-- [Research and decisions](RESEARCH_AND_DECISION.md): inspected behavior, alternatives, guards, and scope.
-- [PR draft](PR_DRAFT.md): honest validation status for this fork draft.
-- [Publication record](PUBLICATION.md): base/source provenance and publication boundary.
-- `candidate/`: original test inputs, duplicated from normal repository paths for offline checks only.
-- `tools/`: reconstruction/export utilities, offline checker and mutation runner, opt-in real-stack benchmark.
-- [Evidence guide](evidence/README.md): historical and publication validation summaries, never production benchmarks.
-- `upstream/paginator_reference.py`: complete verified baseline used for offline class extraction; never overwrite candidate source with it.
-- `01-count-queryset.patch`, `02-page-metadata.patch`, and `production.patch`: separable runtime patches. The branch's four-path application/test diff is the canonical combined artifact; `verify_offline.py` reconstructs and checks it without the original ZIP.
+The original candidate/ copies, offline tools, source manifest, and separable patches remain available for provenance. The corrected application files and dated evidence manifest are authoritative for this validation. Do not collect the review directory as part of the backend suite or overwrite old evidence when rerunning offline tools.
 
-Run real tests from `apps/api` as specified in the handoff, not by recursively collecting the review directory. Use an isolated copy of the packet to rerun `python tools/verify_offline.py`; it writes reports and must not overwrite historical evidence in place.
-
-The official PRs #9947 and #9952, old evidence branches, and the fork's `preview` are outside the write scope. Any official submission or merge requires a separate user instruction.
+Fork [PR #2](https://github.com/GODOSTROYER/plane/pull/2) uses a different RowPreservingList design. It remains unchanged and was not combined with this implementation. Read the validation report for the tradeoff; the current measurements do not compare the two designs directly.
