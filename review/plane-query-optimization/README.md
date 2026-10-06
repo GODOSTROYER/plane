@@ -4,6 +4,10 @@ This packet collects the proposed performance follow-up for the public project-l
 
 **This is a review packet on the contributor's public fork, not a pull request to Plane.** It is isolated on a review branch and does not change the fork's default branch or the upstream repository.
 
+## Independent review corrections
+
+The [independent architecture and publication review](reports/INDEPENDENT_REVIEW.md) identifies and corrects two broken benchmark import paths, inaccurate cache-reset metadata, a malformed PR table, and CI wording. The [checkout reproduction guide](benchmarks/README.md) documents the commands and limits. Five dependency-free packet checks pass after these corrections; they do not independently rerun or increase the backend test count reported below. Historical archive bytes and measurements are unchanged.
+
 ## Start here
 
 1. [Final review report](reports/FINAL_REVIEW.md)
@@ -26,7 +30,7 @@ The review branch also includes the changed application view and regression test
 - The prepared contribution snapshot lists Arnav Bule as its sole author. Review-packet and source-publication commits are separate; no upstream PR was created.
 - Backend suite: 732 passed in both the repository's Linux Docker Compose environment and the Windows test environment; all 32 expansion regression cases passed. Four additional endpoint checks passed. Changed-file lint, formatting, copyright, Django system check, and migration-drift checks passed.
 - The full run emitted 92 pre-existing dependency warnings: 4 from factory_boy cleanup behavior and 88 from openpyxl's deprecated datetime.utcnow() usage. Neither source is in the changed files, and no warning caused a test failure.
-- Hosted GitHub CI and maintainer approval are still pending; no PR to makeplane/plane has been opened.
+- Hosted GitHub CI and upstream maintainer approval remain unverified; no PR to makeplane/plane has been opened. The reported local results are not a hosted run.
 
 ## What the headline benchmark establishes
 
@@ -39,6 +43,6 @@ The expanded HTTP query-bound regression also covers all four user relationships
 - Project cover-image loading remains outside this change.
 - The current SQL capture uses the default database test configuration; real read-replica routing was not exercised.
 - The distinct-user optimized timing distribution has a broad IQR; no statistical-significance or production-scale claim is made.
-- Hosted CI has not run because there is no upstream PR awaiting maintainer approval.
+- No hosted CI result is established by this packet. Actions can also run on a fork when its workflows, branch filters and permissions allow; an upstream PR is not a universal prerequisite.
 
 See the [historical initial research report](reports/INITIAL_RESEARCH_HISTORICAL.md) for the earlier investigation. Its proposed join-first approach and unrun-test status were superseded by the final benchmark decision and validation documented above.

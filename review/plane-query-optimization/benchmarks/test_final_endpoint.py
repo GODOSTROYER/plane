@@ -158,8 +158,8 @@ def test_final_http_stack(
         "sql_capture_during_timing": False,
         "allocation_tracing_during_timing": False,
         "quantile_method": "statistics.quantiles(n=4, method='inclusive')",
-        "clock_scope": "APIClient.get plus response.json; token-cache eviction outside clock",
-        "cold_api_token_cache_per_request": True,
+        "clock_scope": "APIClient.get plus response.json; API-key throttle-history reset outside clock",
+        "api_key_throttle_history_reset_per_request": True,
         "summary": summary,
         "trials": results,
         "production_source_sha256": hashlib.sha256(

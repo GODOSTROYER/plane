@@ -49,7 +49,7 @@ def test_benchmark(distribution, workspace, create_user, make_expansion_project,
             )
             Project.objects.filter(pk=project.pk).update(cover_image_asset=asset)
 
-    specification = importlib.util.spec_from_file_location("project_benchmark", EVIDENCE / "tools/benchmark_project_expansion.py")
+    specification = importlib.util.spec_from_file_location("project_benchmark", Path(__file__).resolve().with_name("benchmark_project_expansion.py"))
     benchmark = importlib.util.module_from_spec(specification)
     specification.loader.exec_module(benchmark)
     arguments = [
