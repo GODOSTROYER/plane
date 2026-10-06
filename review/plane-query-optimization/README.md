@@ -1,5 +1,7 @@
 # Plane project-list user-expansion review packet
 
+Latest: [corrected-packet integration verification](reports/INTEGRATION_VALIDATION.md), including reruns of all published benchmark harnesses. This addendum supersedes the original publication-status notes below.
+
 This packet collects the proposed performance follow-up for the public project-list API, following the deferred query work noted in [Plane PR #9717](https://github.com/makeplane/plane/pull/9717).
 
 **This is a review packet on the contributor's public fork, not a pull request to Plane.** It is isolated on a review branch and does not change the fork's default branch or the upstream repository.

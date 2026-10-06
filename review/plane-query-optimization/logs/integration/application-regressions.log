@@ -1,0 +1,23 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.6, pytest-9.0.3, pluggy-1.6.0
+django: version: 5.2.17, settings: plane.settings.test (from env)
+rootdir: <checkout>\apps\api
+configfile: pytest.ini
+plugins: anyio-4.15.1, Faker-25.0.0, cov-4.1.0, django-4.12.0, mock-3.11.1, xdist-3.3.1
+collected 32 items
+
+plane\tests\contract\api\test_project_list_expansion_queries.py ................................
+
+============================== warnings summary ===============================
+plane/tests/contract/api/test_project_list_expansion_queries.py::test_http_user_expansion_uses_bounded_queries_as_page_grows[audit-users]
+plane/tests/contract/api/test_project_list_expansion_queries.py::test_http_user_expansion_uses_bounded_queries_as_page_grows[all-users]
+plane/tests/contract/api/test_project_list_expansion_queries.py::test_http_expansion_does_not_change_project_visibility
+plane/tests/contract/api/test_project_list_expansion_queries.py::test_http_null_user_expansions_add_no_queries[audit-users]
+plane/tests/contract/api/test_project_list_expansion_queries.py::test_http_null_user_expansions_add_no_queries[all-users]
+plane/tests/contract/api/test_project_list_expansion_queries.py::test_empty_http_result_preserves_pagination_metadata
+plane/tests/contract/api/test_project_list_expansion_queries.py::test_expansion_preserves_cursor_pages_and_metadata
+  <test-environment>\Lib\site-packages\django\core\handlers\base.py:61: UserWarning: No directory at: <checkout>\apps\api\plane\static-assets\collected-static\
+    mw_instance = middleware(adapted_handler)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================== 32 passed, 7 warnings in 77.48s (0:01:17) ==================

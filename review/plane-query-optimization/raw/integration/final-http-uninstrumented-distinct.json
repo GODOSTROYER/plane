@@ -1,0 +1,207 @@
+{
+  "scope": "Full Django HTTP stack through APIClient, no TCP; only expansion prefetches removed for legacy comparison",
+  "rows": 100,
+  "workspace_rows": 100,
+  "debug": false,
+  "statistics_refreshed": true,
+  "repeats_per_variant": 20,
+  "warmup_per_variant": 2,
+  "parameters": {
+    "fields": "id,name,created_by,updated_by",
+    "expand": "created_by,updated_by",
+    "order_by": "name",
+    "per_page": 100
+  },
+  "python": "3.12.6",
+  "platform": "Windows",
+  "django": "5.2.17",
+  "postgresql_version": 150019,
+  "sql_capture_during_timing": false,
+  "allocation_tracing_during_timing": false,
+  "quantile_method": "statistics.quantiles(n=4, method='inclusive')",
+  "clock_scope": "APIClient.get plus response.json; API-key throttle-history reset outside clock",
+  "api_key_throttle_history_reset_per_request": true,
+  "summary": {
+    "legacy": {
+      "median_ms": 1245.3375500335824,
+      "q1_ms": 1184.4697750202613,
+      "q3_ms": 1509.5178250339814,
+      "iqr_ms": 325.04805001372006,
+      "minimum_ms": 1120.1527999946848,
+      "maximum_ms": 2240.717000036966,
+      "query_count_separately_captured": 408
+    },
+    "optimized": {
+      "median_ms": 464.35210001072846,
+      "q1_ms": 345.228074977058,
+      "q3_ms": 517.7043249859707,
+      "iqr_ms": 172.47625000891276,
+      "minimum_ms": 314.036599942483,
+      "maximum_ms": 747.561099997256,
+      "query_count_separately_captured": 10
+    }
+  },
+  "trials": [
+    {
+      "variant": "legacy",
+      "milliseconds": 1198.4381999936886
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 338.30280002439395
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1187.4358000350185
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 541.2798000033945
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 314.3487999914214
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 336.57660003518686
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1528.079500014428
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1496.1988999857567
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 314.036599942483
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1120.1527999946848
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 350.5597999901511
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 514.268999977503
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1206.8192000151612
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 347.53649996127933
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1164.4751999992877
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 566.9451999710873
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 2073.1640000012703
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 485.73330004001036
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 333.53569998871535
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 576.7666000174358
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1625.0740000396036
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 442.97089998144656
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 495.03099999856204
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 747.561099997256
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 501.1501000262797
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1420.6182999769226
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1863.1138000055216
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 2240.717000036966
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1246.4264000300318
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1244.248700037133
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 488.0576999858022
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1503.3306000404991
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 369.240699976217
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 394.8001000098884
+    },
+    {
+      "variant": "optimized",
+      "milliseconds": 528.010300011374
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1175.5716999759898
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1168.2925999630243
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1175.3703000140376
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1377.156600006856
+    },
+    {
+      "variant": "legacy",
+      "milliseconds": 1204.435600026045
+    }
+  ],
+  "production_source_sha256": "f0599d059fd82061107251c064ba02d01ad457877efbddf9ada8f4883bb6dfa3"
+}

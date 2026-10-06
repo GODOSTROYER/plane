@@ -1,8 +1,10 @@
 ### Description
 
-The public project-list endpoint can issue repeated user and avatar reads when a page expands project users. This follow-up to [#9717](https://github.com/makeplane/plane/pull/9717) batches the requested `created_by`, `updated_by`, `project_lead`, and `default_assignee` relations, including each user's avatar. Loading is limited to expansions that remain in `fields`; the existing project-lead join and serializer are preserved.
+The public project-list endpoint performs repeated user and avatar reads when a page expands user relationships. For example, `fields=id,name,created_by,updated_by&expand=created_by,updated_by` on 100 projects with uploaded-avatar audit users issued 408 SQL statements in the local request-stack benchmark.
 
-The change does not alter response shape, permissions, writes, or schema. Cover-image loading is outside this scope.
+This follow-up to #9717 batches included `created_by`, `updated_by`, `project_lead`, and `default_assignee` expansions together with their avatar assets. It intersects `expand` with `fields`, allowlists the supported relationships, and retains the existing project-lead join. Other users use their base manager to preserve ordinary foreign-key lookup semantics, including inactive historical users.
+
+The change is confined to the list GET handler and regression tests. Serialization, permissions, ordering, pagination, writes, and schema remain unchanged. Cover-image loading is outside this scope.
 
 ### Type of Change
 
@@ -19,20 +21,22 @@ Not applicable.
 
 ### Test Scenarios
 
-- Added 32 database-backed regression cases for sparse fields, all four expansions, bounded query growth, query-free serialization, user/avatar identity, null and inactive users, soft-deleted avatars, visibility, empty results, and cursor pagination.
-- Full backend suite: **732 passed** in the repository's Linux Docker Compose test environment; the same 732 tests also passed on Windows. The regression tests reproduce the repeated reads against the pristine base.
-- Changed-file lint, formatting, copyright, Django system check, and migration-drift check passed. Hosted GitHub CI has not run yet.
+- **732 backend tests passed** in the repository's Linux Docker Compose stack and Windows test environment, including **32 new regression cases**. The final regression file against the pristine base produced 21 failures and 11 passes, demonstrating the missing loading guarantees.
+- Coverage includes all four expansions, sparse fields, exact user/avatar identity, shared users across roles, null/inactive users, soft-deleted avatars, bounded HTTP query growth, query-free serialization after page loading, visibility, empty results, and cursor pagination.
+- Changed-file Ruff lint/formatting, copyright, Django system checks, and migration-drift checks passed. The 92 full-suite warnings are existing factory_boy/openpyxl deprecations; none originate in the changed files.
+- Local validation is separate from hosted GitHub checks and maintainer review.
 
-Local 100-project APIClient measurements with fields=id,name,created_by,updated_by and expand=created_by,updated_by (20 randomized timed trials after two warmups; SQL counts collected separately):
+6 October 2026 rerun of the corrected published harness: local 100-project audit-user measurements (20 randomized trials per variant after two warmups; SQL counts captured separately from timing):
 
 | Fixture | SQL statements, before → after | Median, before → after | IQR, before → after |
 | --- | ---: | ---: | ---: |
-| Distinct uploaded-avatar users | 408 → 10 | 954.3 → 269.5 ms | 36.6 → 164.3 ms |
-| Shared uploaded-avatar users | 408 → 10 | 961.5 → 250.5 ms | 62.4 → 52.0 ms |
-| Null audit-user relations | 8 → 8 | 60.8 → 66.7 ms | 4.1 → 2.0 ms |
+| Distinct uploaded-avatar users | 408 → 10 | 1245.3 → 464.4 ms | 325.0 → 172.5 ms |
+| Shared uploaded-avatar users | 408 → 10 | 1538.7 → 396.9 ms | 654.3 → 250.6 ms |
+| Null audit-user relations | 8 → 8 | 112.0 → 124.2 ms | 45.4 → 62.8 ms |
 
-This timing and SQL-count comparison exercises the two audit fields listed above; the four user relationships are covered by the regression tests, not by this headline timing experiment. Responses were identical in the measured comparisons. Timings cover the local Django APIClient request stack and JSON parsing; they are not production latency claims. The null-user median was about 6 ms higher locally, with no claim that this is statistically significant.
+Responses were identical. These measurements cover `APIClient.get` plus JSON parsing for `fields=id,name,created_by,updated_by&expand=created_by,updated_by`, rather than TCP or production traffic. The A/B harness reconstructs legacy loading by removing only the new expansion prefetches at pagination; the pristine-base regression run is separate. The null-user median increased by about 12 ms, and the distinct-user optimized IQR is broad; no statistical-significance or universal latency claim is made. Real replica routing and production-scale workspaces were not exercised. Earlier 5 October measurements are preserved unchanged in the historical evidence archive; the table above uses the latest replay.
 
 ### References
 
-Follow-up to the project-list query optimization noted in [#9717](https://github.com/makeplane/plane/pull/9717).
+- Follow-up to the project-list N+1 work explicitly deferred in #9717.
+- [Reproduction commands, strategy decision, raw trials, SQL accounting, and validation logs](https://github.com/GODOSTROYER/plane/tree/ac453a0783f0774b196d44d665afafb2b5fcbc39/review/plane-query-optimization). The evidence packet is hosted separately on my fork; this PR contains only the application change and regression tests.
