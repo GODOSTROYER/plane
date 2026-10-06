@@ -52,7 +52,7 @@ The final prefetch implementation was measured again after test strengthening, w
 
 The null-user median was about 6 ms higher in both the older and this new local experiment. Additional Python loading-plan work and system variability are possible contributors; no causal attribution or statistical significance is established. Do not describe the patch as having no latency regression. The optimized distinct-user timing also has a broad IQR; the raw distributions remain available.
 
-See [the ten-statement accounting](QUERY_ACCOUNTING.md) for the remaining authentication, permission, pagination, membership and expansion work. The portable evidence bundle includes the scripts, raw trials, representative plans and final validation logs. The strengthened tests pass (732 across the backend suite, including 32 expansion cases; four additional endpoint checks). The full backend suite also passed under Linux in the repository's disposable Docker Compose test stack; hosted GitHub CI remains pending until a PR is published.
+See [the ten-statement accounting](QUERY_ACCOUNTING.md) for the remaining authentication, permission, pagination, membership and expansion work. The portable evidence bundle includes the scripts, raw trials, representative plans and final validation logs. The strengthened tests pass (732 across the backend suite, including 32 expansion cases; four additional endpoint checks). The full backend suite also passed under Linux in the repository's disposable Docker Compose test stack. No hosted GitHub CI result is established by this packet; fork workflow execution and upstream review are separate from these local runs.
 
 ## Evidence files
 
