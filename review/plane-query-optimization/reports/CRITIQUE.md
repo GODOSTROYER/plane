@@ -9,7 +9,7 @@ This is a candid review aid for the proposed Plane project-list user/avatar batc
 3. **A separate N+1 remains.** Project cover-image assets can still cause per-row reads for full responses. This work only addresses requested user/avatar expansions.
 4. **Replica routing is not verified.** The captured SQL and query tests use the default database test configuration. They do not prove behavior when a real read-replica router is active.
 5. **The 92 warnings are unrelated but visible.** They come from existing factory_boy cleanup behavior and openpyxl's deprecated datetime.utcnow() calls. No changed-file warning or warning-caused test failure was reported. Do not hide or claim they were fixed.
-6. **Hosted CI is pending.** Local Windows and Linux Docker Compose suites passed, but hosted GitHub checks and maintainer review cannot be claimed until an upstream PR exists.
+6. **Hosted CI is pending.** The packet reports passing local Windows and Linux Docker Compose suites. No hosted result is established by those runs. GitHub Actions may run on a fork when its workflows and permissions allow; an upstream PR is not a universal prerequisite. Upstream approval and any required upstream checks remain separate.
 
 ## Test-design maintainability note
 

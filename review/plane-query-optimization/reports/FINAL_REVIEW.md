@@ -45,4 +45,4 @@ The regression tests exercise all four supported user expansions. The headline t
 
 Project cover-image reads remain outside the patch. The SQL evidence uses the default-database test configuration and does not verify a real read-replica topology. Fixtures are synthetic and do not establish behavior at production workspace sizes. The all-four HTTP regressions, query accounting, raw plans, logs, and reproduction instructions are included in the review packet and evidence archive.
 
-Before opening an upstream PR, repeat the duplicate-PR search and follow Plane's current contribution instructions. Hosted CI and maintainer review become available only after the upstream PR is opened. This publication itself is review material only.
+Before opening an upstream PR, repeat the duplicate-PR search and follow Plane's current contribution instructions. Hosted Actions can also run on a fork when configured and permitted; no hosted result is established by this packet. Upstream review and any required upstream checks remain separate. This publication itself is review material only.

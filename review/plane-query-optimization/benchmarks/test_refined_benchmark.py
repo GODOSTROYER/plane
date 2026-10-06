@@ -39,7 +39,7 @@ def test_refined_comparison(distribution, workspace, create_user, make_expansion
         cursor.execute(f"ANALYZE {tables}")
     print(f"Refined {distribution}: seeded {count} rows and refreshed statistics", flush=True)
 
-    spec = importlib.util.spec_from_file_location("refined_benchmark", EVIDENCE / "tools/benchmark_project_expansion.py")
+    spec = importlib.util.spec_from_file_location("refined_benchmark", Path(__file__).resolve().with_name("benchmark_project_expansion.py"))
     benchmark = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(benchmark)
     output = EVIDENCE / f"refined-{distribution}.json"

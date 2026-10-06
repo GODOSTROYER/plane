@@ -26,7 +26,7 @@ Not applicable.
 Local 100-project APIClient measurements with fields=id,name,created_by,updated_by and expand=created_by,updated_by (20 randomized timed trials after two warmups; SQL counts collected separately):
 
 | Fixture | SQL statements, before → after | Median, before → after | IQR, before → after |
-| --- | ---: | ---: |
+| --- | ---: | ---: | ---: |
 | Distinct uploaded-avatar users | 408 → 10 | 954.3 → 269.5 ms | 36.6 → 164.3 ms |
 | Shared uploaded-avatar users | 408 → 10 | 961.5 → 250.5 ms | 62.4 → 52.0 ms |
 | Null audit-user relations | 8 → 8 | 60.8 → 66.7 ms | 4.1 → 2.0 ms |
