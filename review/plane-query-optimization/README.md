@@ -16,7 +16,7 @@ This packet collects the proposed performance follow-up for the public project-l
 8. [Sanitized evidence archive](evidence/plane-evidence-c70e8050e728-linux-validated.zip)
 9. [Evidence redaction and integrity audit](evidence/PUBLICATION_AUDIT.md)
 
-The archive includes raw final and historical benchmark trials, SQL captures, PostgreSQL plans, the Linux Docker Compose test transcript, validation logs, scripts, source hashes, a sanitization manifest, and a SHA256 manifest. Its own README contains reproduction instructions and explains which evidence is historical. The archive SHA256 is 553d5caf5624f4dbc6f179c92ff8c18fa2d7a21dae3da4dbe7ddef4a3d144e19.
+The review branch also includes the changed application view and regression test at their normal source paths for direct code review. The archive includes raw final and historical benchmark trials, SQL captures, PostgreSQL plans, the Linux Docker Compose test transcript, validation logs, scripts, source hashes, a sanitization manifest, and a SHA256 manifest. Its own README contains reproduction instructions and explains which evidence is historical. The archive SHA256 is 553d5caf5624f4dbc6f179c92ff8c18fa2d7a21dae3da4dbe7ddef4a3d144e19.
 
 ## Snapshot and validation
 
