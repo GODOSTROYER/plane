@@ -1,0 +1,88 @@
+name: Fork pagination validation
+on:
+  push:
+    branches: [verify/pagination-cdd2459]
+permissions:
+  contents: read
+concurrency:
+  group: fork-pagination-cdd2459
+  cancel-in-progress: true
+jobs:
+  postgres:
+    if: github.repository == 'GODOSTROYER/plane'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: cdd2459637454202b8120daed9d12ef56842df64
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Configure disposable test environment
+        run: |
+          cp apps/api/.env.example apps/api/.env
+          cat >> apps/api/.env <<'EOF'
+          SECRET_KEY=pagination-disposable-ci-only-not-for-production
+          AMQP_URL=amqp://plane:plane@test-mq:5672/plane
+          APP_BASE_URL=http://localhost:3000
+          API_BASE_URL=http://localhost:8000
+          WEB_URL=http://localhost:3000
+          EOF
+          mkdir -p apps/api/pagination-evidence
+          git rev-parse HEAD > apps/api/pagination-evidence/head.txt
+      - name: PostgreSQL and routed request regressions
+        id: focused
+        run: |
+          set -o pipefail
+          docker compose -p plane-pagination-validation -f docker-compose-test.yml run --rm --build api-tests \
+            pytest plane/tests/unit/utils/test_paginator_evaluation.py plane/tests/contract/pagination \
+            -q --junitxml=/code/pagination-evidence/focused.xml \
+            2>&1 | tee apps/api/pagination-evidence/focused.log
+      - name: Verify genuine failures on pristine runtime
+        if: steps.focused.outcome == 'success'
+        run: |
+          git show 7466675e471efe1c96b122615f7a0d30c9b2eb05:apps/api/plane/utils/paginator.py > apps/api/plane/utils/paginator.py
+          git show 7466675e471efe1c96b122615f7a0d30c9b2eb05:apps/api/plane/utils/grouper.py > apps/api/plane/utils/grouper.py
+          set +e
+          docker compose -p plane-pagination-validation -f docker-compose-test.yml run --rm api-tests \
+            pytest plane/tests/contract/pagination -k 'counting_never_hydrates_models or projected_page_is_read_once' \
+            -q --junitxml=/code/pagination-evidence/baseline.xml > apps/api/pagination-evidence/baseline.log 2>&1
+          status=$?
+          set -e
+          cat apps/api/pagination-evidence/baseline.log
+          test "$status" -eq 1
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse('apps/api/pagination-evidence/baseline.xml').getroot()
+          suites = list(root.iter('testsuite'))
+          assert sum(int(s.get('errors', 0)) for s in suites) == 0
+          assert sum(int(s.get('failures', 0)) for s in suites) > 0
+          PY
+          git restore --source=cdd2459637454202b8120daed9d12ef56842df64 -- apps/api/plane/utils/paginator.py apps/api/plane/utils/grouper.py
+      - name: Full backend suite on candidate
+        if: success()
+        run: |
+          set -o pipefail
+          docker compose -p plane-pagination-validation -f docker-compose-test.yml run --rm api-tests \
+            pytest plane/tests -q --junitxml=/code/pagination-evidence/full.xml \
+            2>&1 | tee apps/api/pagination-evidence/full.log
+      - name: Changed-file lint and formatting evidence
+        if: always()
+        run: |
+          git restore --source=cdd2459637454202b8120daed9d12ef56842df64 -- apps/api/plane/utils/paginator.py apps/api/plane/utils/grouper.py
+          python -m pip install ruff
+          ruff --version | tee apps/api/pagination-evidence/ruff-version.txt
+          paths='apps/api/plane/utils/paginator.py apps/api/plane/utils/grouper.py apps/api/plane/tests/unit/utils/test_paginator_evaluation.py apps/api/plane/tests/contract/pagination/test_paginator_evaluation.py'
+          ruff format --diff $paths > apps/api/pagination-evidence/format.patch
+          ruff check $paths
+          test ! -s apps/api/pagination-evidence/format.patch
+      - name: Upload test evidence (no environment files)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pagination-cdd2459-evidence
+          path: apps/api/pagination-evidence/
+          retention-days: 7
+      - name: Stop disposable test services
+        if: always()
+        run: docker compose -p plane-pagination-validation -f docker-compose-test.yml down -v
