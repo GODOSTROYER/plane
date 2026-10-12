@@ -1,0 +1,18 @@
+{
+  "scope": "Static parameter-case inventory; not evidence of test execution",
+  "files": {
+    "apps/api/plane/tests/contract/api/test_work_item_pagination_evaluation.py": {
+      "functions": 10,
+      "authored_cases_static_count": 21
+    },
+    "apps/api/plane/tests/contract/test_paginator_evaluation.py": {
+      "functions": 13,
+      "authored_cases_static_count": 22
+    },
+    "apps/api/plane/tests/unit/utils/test_paginator_evaluation.py": {
+      "functions": 17,
+      "authored_cases_static_count": 57
+    }
+  },
+  "total_authored_cases": 100
+}

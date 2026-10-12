@@ -1,0 +1,14 @@
+--- a/apps/api/plane/utils/paginator.py
++++ b/apps/api/plane/utils/paginator.py
+@@ -157,7 +157,10 @@
+         if cursor.value != limit and cursor.is_prev:
+             results = results[-(limit + 1) :]
+ 
+-        total_count = self.total_count_queryset.count() if self.total_count_queryset else queryset.count()
++        # QuerySet truthiness fetches every matching row. Only None means that
++        # no count queryset was supplied; an explicit empty queryset counts as 0.
++        count_queryset = self.total_count_queryset if self.total_count_queryset is not None else queryset
++        total_count = count_queryset.count()
+ 
+         # Check if there are more results available after the current page
+ 

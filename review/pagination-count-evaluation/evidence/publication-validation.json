@@ -1,0 +1,86 @@
+{
+  "scope": "OFFLINE ONLY: AST syntax, selected real method bodies with framework doubles, mutation and temporary-Git patch tests",
+  "not_run": [
+    "real Django/DRF unit tests",
+    "PostgreSQL ORM tests",
+    "HTTP request-stack tests",
+    "TCP smoke test",
+    "Ruff",
+    "full backend suite",
+    "benchmarks",
+    "hosted CI"
+  ],
+  "python": "3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]",
+  "parsed_python_files": [
+    "candidate/apps/api/plane/tests/contract/api/test_work_item_pagination_evaluation.py",
+    "candidate/apps/api/plane/tests/contract/test_paginator_evaluation.py",
+    "candidate/apps/api/plane/tests/unit/utils/test_paginator_evaluation.py",
+    "tools/changes.py",
+    "tools/export_baseline.py",
+    "tools/prepare_branch.py",
+    "tools/run_offline.py",
+    "tools/test_pagination_benchmark.py",
+    "tools/verify_offline.py",
+    "upstream/paginator_reference.py"
+  ],
+  "test_results": {
+    "candidate": {
+      "tests": 57,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "upstream": {
+      "tests": 57,
+      "failures": 12,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "mutation_results": {
+    "restore_count_truthiness": {
+      "detected": true,
+      "failed_assertions": 5,
+      "collection_errors": 0
+    },
+    "restore_metadata_hydration": {
+      "detected": true,
+      "failed_assertions": 7,
+      "collection_errors": 0
+    },
+    "count_transformed_output": {
+      "detected": true,
+      "failed_assertions": 7,
+      "collection_errors": 0
+    },
+    "drop_lock_guard": {
+      "detected": true,
+      "failed_assertions": 1,
+      "collection_errors": 0
+    },
+    "drop_slice_guard": {
+      "detected": true,
+      "failed_assertions": 1,
+      "collection_errors": 0
+    },
+    "drop_custom_result_guard": {
+      "detected": true,
+      "failed_assertions": 1,
+      "collection_errors": 0
+    },
+    "drop_passthrough_guard": {
+      "detected": true,
+      "failed_assertions": 2,
+      "collection_errors": 0
+    },
+    "drop_callback_guard": {
+      "detected": true,
+      "failed_assertions": 1,
+      "collection_errors": 0
+    }
+  },
+  "patch_apply_reverse_and_staged_apply": "passed_on_verified_reference",
+  "full_repository_git_blob_application": "verified full file reference; not a full application checkout",
+  "source_reference_sha256": "b0ef2886e2bdbbd7013c5516fa4afb061f367ca9a5da4c884cf209483db48105",
+  "candidate_reference_sha256": "87b907f039a5592c5d68a9da915424e58b8ad1320901dc41209b2f8f68544b9f"
+}

@@ -1,0 +1,26 @@
+{
+  "scope": "Git blob identities of application/tests and executable reproduction inputs; not a test-pass certificate or a full repository manifest",
+  "repository": "GODOSTROYER/plane",
+  "branch": "perf/pagination-count-evaluation",
+  "base_commit": "7466675e471efe1c96b122615f7a0d30c9b2eb05",
+  "base_paginator_blob": "2082041f1ac641ade4aa87eb9f0d9c581233e333",
+  "application_files": {
+    "apps/api/plane/utils/paginator.py": "9909da0a627412e76d0a0ac25573517544bb9c32",
+    "apps/api/plane/tests/unit/utils/test_paginator_evaluation.py": "cc675bd1526ee9187db3a68c3a46312396d95c43",
+    "apps/api/plane/tests/contract/test_paginator_evaluation.py": "87969d9c09923feb31d0b43484157f66f8294f4c",
+    "apps/api/plane/tests/contract/api/test_work_item_pagination_evaluation.py": "1f3befad5e63d7e16ecbf021ea3ef80d9ae3f7fb"
+  },
+  "packet_files_relative_to_this_directory": {
+    "tools/changes.py": "c304923b5d508b456cee315a5c6fea927801eb36",
+    "tools/run_offline.py": "073b95782a4733a44caf39e73f2c493eb5afd9ba",
+    "tools/verify_offline.py": "69950d10eb4b3f6954c8917210084768aec50255",
+    "tools/prepare_branch.py": "a2826fd24996fc3de9d72b4dc290afb6fa204759",
+    "tools/export_baseline.py": "f16e4cb2efa043dbb20d7459bdfb1ff5b5fb244e",
+    "tools/test_pagination_benchmark.py": "ed03f456b2d3ae170efd4d3d54b9802f3f6efe39",
+    "01-count-queryset.patch": "4ad0d6c0dec119a442f5233cad0c3e79e51996df",
+    "02-page-metadata.patch": "08d0eec93160ec01f5d714ef33769983347c2ed2",
+    "production.patch": "41c3a4576a276bae89d62b065f5998f25fe23c5b",
+    "upstream/paginator_reference.py": "2082041f1ac641ade4aa87eb9f0d9c581233e333"
+  },
+  "supplied_zip_sha256": "5f4c3f80c65dce1386b9c7d60b866fb715c2ceeac1fc073d9a5b5cbeaff5a000"
+}

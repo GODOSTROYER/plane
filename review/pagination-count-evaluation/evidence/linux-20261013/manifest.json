@@ -1,0 +1,199 @@
+{
+  "date": "2026-10-13",
+  "application_base": "7466675e471efe1c96b122615f7a0d30c9b2eb05",
+  "previous_application_commit": "dfebab8fa3bbb4be9bcda9703797e762d106332b",
+  "application_tree": "eea96a77c20a33081a2558d7581b2457507ff832",
+  "adjacent_revision": "0b3afeac9c58e25c6a527ff7ffd39c9bae83f653",
+  "application_files": {
+    "apps/api/plane/utils/paginator.py": {
+      "git_blob": "7561e8ac7885824d6299b162b78f82d835fb92e5",
+      "sha256": "fc6e277736aa55063e79e5099ddcb94618aaf99207520d621ec962598d1f285e"
+    },
+    "apps/api/plane/app/views/issue/base.py": {
+      "git_blob": "ffb4c0affe263fd792f4470a35f68fa5370d346c",
+      "sha256": "0b0dc26254b96474646e74a4371b1a952aaf5dc6041d8d550fb598601a675c32"
+    },
+    "apps/api/plane/tests/unit/utils/test_paginator_evaluation.py": {
+      "git_blob": "a04fd1daa1264b62435323e226d429d10081cf91",
+      "sha256": "2977f464e166411425a1a2cf28e878647bb05412f33947c8068cf2e5e699ff6d"
+    },
+    "apps/api/plane/tests/contract/test_paginator_evaluation.py": {
+      "git_blob": "a53334fd5f94f8429a76b4a9471cfca1ec411970",
+      "sha256": "20c26c8bf33ee676bdd261d5242a5f344a5c1534e1bd8e1d6b50bf56fdf9654e"
+    },
+    "apps/api/plane/tests/contract/api/test_work_item_pagination_evaluation.py": {
+      "git_blob": "c431efb43fefb06efba181d60b784fc4e48804eb",
+      "sha256": "35ab857e01359bca41344a6db8dab5b8c2fa85b1fe4356ee93468b6393a35328"
+    }
+  },
+  "archive_members": {
+    "run/submitted-all-wrappers.log": {
+      "bytes": 46521,
+      "sha256": "63dd3d74f2d14b3841544379ff8032e061e159da796460891b46f2e5f9a111ac"
+    },
+    "run/submitted-all-wrappers.xml": {
+      "bytes": 25715,
+      "sha256": "9b05dd4f2b2c16b7daa4a27cde3aa4c8767a6f5d95dcd97c76af7e679aa26aff"
+    },
+    "run/baseline-all-wrappers.log": {
+      "bytes": 23681,
+      "sha256": "6b7f958d633cbfb8ebc13ad9249e0f9d76dfccd7ba10e3514b03dbefb762d848"
+    },
+    "run/baseline-all-wrappers.xml": {
+      "bytes": 1069,
+      "sha256": "189b3537d5dbb3378aca6c187b936562e3fba10fa804aae2c00a687e09f3f791"
+    },
+    "run/revised-focused.log": {
+      "bytes": 37944,
+      "sha256": "a060bfb42b555bd651215c6e6466ed0877056bb8e9f3b28c43e7d5eac97fab33"
+    },
+    "run/revised-focused.xml": {
+      "bytes": 18115,
+      "sha256": "95f2165d8065f83ce0e158593e27226a9a09b934128f726452aadf1e32c38dd8"
+    },
+    "run/revised-full.log": {
+      "bytes": 25184,
+      "sha256": "0234c7dc42898ba0c83de4bb714234b1379df3d0f6d1c39183313d68efb4a893"
+    },
+    "run/revised-full.xml": {
+      "bytes": 127883,
+      "sha256": "5d07829a79458b5c746e4cd681e49c40d785ec35e3ad9f91fa32551cd79044f7"
+    },
+    "run/combined-focused.log": {
+      "bytes": 22548,
+      "sha256": "6a3e7f1d483407931daf123164278126e9cc8fc117a15aa865e9a3b8cde45355"
+    },
+    "run/combined-focused.xml": {
+      "bytes": 19863,
+      "sha256": "ca80a9f8de26edf51b69d593379dd5a9444ab2440d2cc5e6d73410e6d2789bfc"
+    },
+    "run/query-shapes.log": {
+      "bytes": 23325,
+      "sha256": "9c576360635b1c33e937474d34eadb27e0cd77d9faad8559bf4d8ea4a959b7ec"
+    },
+    "run/query-shapes.xml": {
+      "bytes": 366,
+      "sha256": "9d858fd884b63f9e8f2730d8d1545befff7386c35fdedb6585caf7155a5fc991"
+    },
+    "run/query-shapes-initial.log": {
+      "bytes": 32856,
+      "sha256": "d5d5db98e2489b4a091564ff689a560eefef95b5b1a73006780b3fd1b141f987"
+    },
+    "run/query-shapes-initial.xml": {
+      "bytes": 10444,
+      "sha256": "32eedd8ed0de7bc15e16ca9090671c6355db930f29330cebb8c4310c78fe76cf"
+    },
+    "run/query-shapes-second.log": {
+      "bytes": 35421,
+      "sha256": "24befd85b31a52f8bf460a5b7942d52cd2ca5ad52f3cc669bd0de5abb08ff973"
+    },
+    "run/query-shapes-second.xml": {
+      "bytes": 12371,
+      "sha256": "c7fc0f2755a5860970eca30b94bb62de7c234d1e59f2a52a81720cbb241e3eea"
+    },
+    "run/query-shapes.json": {
+      "bytes": 8374502,
+      "sha256": "ba53c37d0d88bcb10f176599fa4b2437fcf29f058a62b69ca1c3617cabf04892"
+    },
+    "run/test_query_shapes.py": {
+      "bytes": 16607,
+      "sha256": "43c49b5f9ca9e1361719e4bfc532ab3cd3bc7003ef7c7f3a1fda7a8361531f93"
+    },
+    "run/query-shapes-initial-harness.py": {
+      "bytes": 14267,
+      "sha256": "b721e344aa1d61a7cd10cf064e638ca24f47d59a8180b5195343e971a7c4565d"
+    },
+    "run/query-shapes-second-harness.py": {
+      "bytes": 16447,
+      "sha256": "43b30fbc8e9d7800591ad9c43525a19a584f3729386eddddda4e31f8991d0380"
+    },
+    "run/baseline-paginator.py": {
+      "bytes": 27442,
+      "sha256": "b0ef2886e2bdbbd7013c5516fa4afb061f367ca9a5da4c884cf209483db48105"
+    },
+    "run/submitted-paginator.py": {
+      "bytes": 28555,
+      "sha256": "87b907f039a5592c5d68a9da915424e58b8ad1320901dc41209b2f8f68544b9f"
+    },
+    "run/combined-paginator.py": {
+      "bytes": 28825,
+      "sha256": "ad2e5a35c6af9d5f37e626670e5e8deea6c97a968e7fa7f803dccbcc587899a4"
+    },
+    "run/combined-test-paginator.py": {
+      "bytes": 7814,
+      "sha256": "af67f5b629f449005c479a489d6896380f29a1f86c0dbe5ff472fa35a0cd4c5c"
+    },
+    "run/adjacent-test-paginator.py": {
+      "bytes": 7814,
+      "sha256": "af67f5b629f449005c479a489d6896380f29a1f86c0dbe5ff472fa35a0cd4c5c"
+    },
+    "run/prepare-compatibility.py": {
+      "bytes": 1332,
+      "sha256": "c261fd65653c9fc437b98a146abc894d376e06fb2f836d723d9b1dfeb4964075"
+    },
+    "run/checks.sh": {
+      "bytes": 776,
+      "sha256": "1c910a429ab67dc570a649b1c562366171d345184a633127ac617a9005c3e14f"
+    },
+    "run/checks.log": {
+      "bytes": 1127,
+      "sha256": "93a630b24d87b07029923e7cc4203a7fe4fe04e70f6da0bf28186f3bc9cda168"
+    },
+    "run/dependency-freeze.txt": {
+      "bytes": 2218,
+      "sha256": "66606ea9b83391518d5ef0d4e6b96867e6a196262c715ede453dc10e0a60fa1e"
+    },
+    "run/test-dependency-freeze.txt": {
+      "bytes": 2428,
+      "sha256": "4ed4f186d9f4455dea8503cf66df161c26173d4aea23f631a65f7c4469f44594"
+    },
+    "run/run-compatibility.ps1": {
+      "bytes": 1001,
+      "sha256": "813d3ff04fcbd5cff43d85b750a276d0a58c6823e00af31d47cccd0bc417acf5"
+    },
+    "source/apps/api/plane/utils/paginator.py": {
+      "bytes": 28945,
+      "sha256": "fc6e277736aa55063e79e5099ddcb94618aaf99207520d621ec962598d1f285e"
+    },
+    "source/apps/api/plane/app/views/issue/base.py": {
+      "bytes": 52124,
+      "sha256": "0b0dc26254b96474646e74a4371b1a952aaf5dc6041d8d550fb598601a675c32"
+    },
+    "source/apps/api/plane/tests/unit/utils/test_paginator_evaluation.py": {
+      "bytes": 9467,
+      "sha256": "2977f464e166411425a1a2cf28e878647bb05412f33947c8068cf2e5e699ff6d"
+    },
+    "source/apps/api/plane/tests/contract/test_paginator_evaluation.py": {
+      "bytes": 14890,
+      "sha256": "20c26c8bf33ee676bdd261d5242a5f344a5c1534e1bd8e1d6b50bf56fdf9654e"
+    },
+    "source/apps/api/plane/tests/contract/api/test_work_item_pagination_evaluation.py": {
+      "bytes": 11083,
+      "sha256": "35ab857e01359bca41344a6db8dab5b8c2fa85b1fe4356ee93468b6393a35328"
+    },
+    "tested-source/apps/api/plane/utils/paginator.py": {
+      "bytes": 29719,
+      "sha256": "eee334598874e0b4eedf16e716104e09d3b87724efdea4830142bf4812a7c722"
+    },
+    "tested-source/apps/api/plane/app/views/issue/base.py": {
+      "bytes": 52124,
+      "sha256": "0b0dc26254b96474646e74a4371b1a952aaf5dc6041d8d550fb598601a675c32"
+    },
+    "tested-source/apps/api/plane/tests/unit/utils/test_paginator_evaluation.py": {
+      "bytes": 9467,
+      "sha256": "2977f464e166411425a1a2cf28e878647bb05412f33947c8068cf2e5e699ff6d"
+    },
+    "tested-source/apps/api/plane/tests/contract/test_paginator_evaluation.py": {
+      "bytes": 14890,
+      "sha256": "20c26c8bf33ee676bdd261d5242a5f344a5c1534e1bd8e1d6b50bf56fdf9654e"
+    },
+    "tested-source/apps/api/plane/tests/contract/api/test_work_item_pagination_evaluation.py": {
+      "bytes": 11312,
+      "sha256": "989bde7f778d028636524e16d02d7e4783a94885bfe4a3538bd28e6045809342"
+    }
+  },
+  "publication_check": "Explicit allowlist; UTF-8 parse; common credential/private-key patterns scanned; ZIP CRC and member hashes verified. This is not a proof that every arbitrary string is harmless. Synthetic fixture identifiers and local paths remain in historical logs.",
+  "line_endings": "source/ contains canonical Git LF blobs; tested-source/ contains exact Docker-mounted bytes. All five were verified equal after CRLF-to-LF normalization. The benchmark candidate_sha256 hashes the exact mounted paginator bytes.",
+  "archive_sha256": "8e27d780afec6d827fa335b370fe664b51642b02596e8e367d6c543345eb5abd",
+  "application_commit": "4f1090c08c7b06200265275f872d541b7de99afd"
+}

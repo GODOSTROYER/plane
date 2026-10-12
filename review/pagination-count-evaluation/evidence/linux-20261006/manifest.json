@@ -1,0 +1,192 @@
+{
+  "baseline_commit": "7466675e471efe1c96b122615f7a0d30c9b2eb05",
+  "input_fork_commit": "b8a8da65124432ea7758a1afbc3f2c263eb69872",
+  "application_tree": "c27043e932b405a6988e608107849de24a1c917d",
+  "application_sources": {
+    "apps/api/plane/utils/paginator.py": {
+      "sha256_lf": "87b907f039a5592c5d68a9da915424e58b8ad1320901dc41209b2f8f68544b9f",
+      "sha256_runtime_bytes": "ab3a20fbe882427a4cfcc4ef5776accb770882eca8dcaa865867cc49faa6ce25",
+      "git_blob": "9909da0a627412e76d0a0ac25573517544bb9c32"
+    },
+    "apps/api/plane/tests/unit/utils/test_paginator_evaluation.py": {
+      "sha256_lf": "966cdcdf71b64dc70b4512f9ce7e15c20875bda160d25704dbea8479c1b8706b",
+      "sha256_runtime_bytes": "e235c9a2cf99faf14b9aa979861721f8b78e1c37fc5a6e48305aa194b5c1599f",
+      "git_blob": "662d9a8c125eb13bc3256ead6e0d74bb69cc63fc"
+    },
+    "apps/api/plane/tests/contract/test_paginator_evaluation.py": {
+      "sha256_lf": "c199e6946d061c3a87e6293b32ee7471b09e30e2820599ef44804b712ddd5f64",
+      "sha256_runtime_bytes": "b2687fc01668912dfe5fbd1529a8d11031bb7655373e355b7428a2bb424f7ab5",
+      "git_blob": "8e843a6ea661818e5c7f76c88a7fed3719cc2c86"
+    },
+    "apps/api/plane/tests/contract/api/test_work_item_pagination_evaluation.py": {
+      "sha256_lf": "35ab857e01359bca41344a6db8dab5b8c2fa85b1fe4356ee93468b6393a35328",
+      "sha256_runtime_bytes": "989bde7f778d028636524e16d02d7e4783a94885bfe4a3538bd28e6045809342",
+      "git_blob": "c431efb43fefb06efba181d60b784fc4e48804eb"
+    }
+  },
+  "members": {
+    "raw/benchmark-100-0.json": {
+      "bytes": 822292,
+      "sha256": "1228e8b1e0f75e7bda1fca6f532248413ca50510107cf28dc3dd8a58e45f4b71"
+    },
+    "logs/benchmark-100-0.xml": {
+      "bytes": 372,
+      "sha256": "97d27dd4a9809d18d8b6555139825dc18c38c1bc01a6280c83b8e0cbbaf4fb6c"
+    },
+    "raw/benchmark-100-4096.json": {
+      "bytes": 827996,
+      "sha256": "d05d60642e34a511164ca1b20d38a9815259e052f6e2f75e128401b5eb6c3ae1"
+    },
+    "logs/benchmark-100-4096.xml": {
+      "bytes": 372,
+      "sha256": "5283c70659e191214e1fec14a97e385acba30ba7a58e1c0b29ddfa1055cc511a"
+    },
+    "raw/benchmark-1000-0.json": {
+      "bytes": 821888,
+      "sha256": "be19781bd9092b185bc3b5f413a4a1072be710ddb99dd2a534c829a54607cc5a"
+    },
+    "logs/benchmark-1000-0.xml": {
+      "bytes": 372,
+      "sha256": "33037f957803fdbfddd4277809e94a00ce5713ce4315d6fb9a454aa6e6b2d8b1"
+    },
+    "raw/benchmark-1000-4096.json": {
+      "bytes": 821993,
+      "sha256": "1a5fc1a5d18386454e67365d01092adcc7c3684933ca9726bc7e52f4b78b1c71"
+    },
+    "logs/benchmark-1000-4096.xml": {
+      "bytes": 372,
+      "sha256": "21981104604b0f278b2aaf3ab66609e2df8c172c8fced5445a94af4d09ac5b4c"
+    },
+    "raw/benchmark-10000-0.json": {
+      "bytes": 854253,
+      "sha256": "d60da1b4e9674c36293bbbbf25315f7d85be39e48cd4eb0585c635d438e715cc"
+    },
+    "logs/benchmark-10000-0.xml": {
+      "bytes": 372,
+      "sha256": "4efe85843dfbfa4b33a8d3bcb94e622e251eea0c7528436eb9bda2e0d439dabd"
+    },
+    "raw/benchmark-10000-4096.json": {
+      "bytes": 854376,
+      "sha256": "af8b70baf63a6cac7b3fe2f2dad1889605d0d73fea3bcc52d44cad3edb571a78"
+    },
+    "logs/benchmark-10000-4096.xml": {
+      "bytes": 374,
+      "sha256": "9fbda73da575d169a6d229900f34faaa12adb66c0d17558acb3d11bacbe0f2cf"
+    },
+    "logs/full-backend.log": {
+      "bytes": 24903,
+      "sha256": "b954dd290e59fe8538cd1d6072af2c24d1851cc504a27e8d54dc430d7bd7a261"
+    },
+    "logs/full-backend.xml": {
+      "bytes": 126180,
+      "sha256": "f9f9238542097f915b08fde739de6d7a08a09e7fe4d8c5995158c9f9da75e3b9"
+    },
+    "logs/baseline-full.log": {
+      "bytes": 89020,
+      "sha256": "734560a452b4ca43a4bf098f1f122e35a06d30e1734745bddb57840a8f0f5250"
+    },
+    "logs/baseline-full.xml": {
+      "bytes": 197308,
+      "sha256": "dd49cff47798ef52dc73c902f97ce0e505e4774630fa50ecaf20c91e2122ec6a"
+    },
+    "logs/real-focused.log": {
+      "bytes": 62182,
+      "sha256": "9fa5354beeed432a1cce4ff7d4c032cc7f8eb5b23c14c630de1b88cf12091904"
+    },
+    "logs/real-focused.xml": {
+      "bytes": 38917,
+      "sha256": "fb3b0035b719c8ee6a07c269e96e3bf2e2770bc5809cc2db32174d02edde2995"
+    },
+    "logs/real-focused-corrected.log": {
+      "bytes": 36125,
+      "sha256": "0feffe016cfc5977e49092acda7e9a16950a53fb97246f98fb6f26a1a63ea0c3"
+    },
+    "logs/real-focused-corrected.xml": {
+      "bytes": 16411,
+      "sha256": "b8729efd6bb476127a5b2727b8228e8af240f23f02e61d8a2932cac2aa548028"
+    },
+    "logs/integration-9948.log": {
+      "bytes": 22296,
+      "sha256": "8d627825b0eaf4b3637f09797d7bba5f3a61ef2ab6a76b532eff845e911cc104"
+    },
+    "logs/integration-9948.xml": {
+      "bytes": 18160,
+      "sha256": "43a07dc3199b12d3b84ad54381cddec18ec8ecadc32caf598ab11e86b13b757c"
+    },
+    "logs/linux-checks.log": {
+      "bytes": 1049,
+      "sha256": "e2f8aeed8da19cefc4c67bc51a35d699449c23022af5e4643f2510673f7bdcfc"
+    },
+    "logs/candidate-repository-lint.log": {
+      "bytes": 1992,
+      "sha256": "5f9cc257d0cbee47293cf57f6bb14e2f0463222d65b894a7d12e71bba448fdd7"
+    },
+    "logs/baseline-repository-lint.log": {
+      "bytes": 1992,
+      "sha256": "5f9cc257d0cbee47293cf57f6bb14e2f0463222d65b894a7d12e71bba448fdd7"
+    },
+    "logs/benchmarks.log": {
+      "bytes": 22879,
+      "sha256": "060d70b541c238e0839ab3a36dd80ead6c48508ac95d17ab7558e5c47e8bb2b7"
+    },
+    "dependency-freeze.txt": {
+      "bytes": 2428,
+      "sha256": "0120669927d624523bf634937ba1915f847438e1c852250a669100ba787489c2"
+    },
+    "tools/checks.sh": {
+      "bytes": 720,
+      "sha256": "541c5ed804ef4604b660f8b22b413735c5c3228eed0e07268d0970e4d3a97712"
+    },
+    "tools/run-benchmarks.sh": {
+      "bytes": 657,
+      "sha256": "01b8cb3902160298f61c0a692c5eaa4c9196a3eac8a176dbe29b9d046cda2011"
+    },
+    "tools/test_pagination_benchmark.py": {
+      "bytes": 10487,
+      "sha256": "e9a2666fc98625ad7fc0cfd838ddd7485f2c293244de5e9a91a42ef6103582fb"
+    },
+    "baseline/paginator.py": {
+      "bytes": 27442,
+      "sha256": "b0ef2886e2bdbbd7013c5516fa4afb061f367ca9a5da4c884cf209483db48105"
+    },
+    "integration-9948/integration-paginator.py": {
+      "bytes": 28435,
+      "sha256": "b427406329832c7b7802283a3573f51b8806537d83aa908db4c688b65d2e49bb"
+    },
+    "integration-9948/integration-test-paginator.py": {
+      "bytes": 7815,
+      "sha256": "2e218aac23ce56d659623d78e107ccc21e1c8fd4df6144d9f8207a23ec8b9832"
+    },
+    "source/apps/api/plane/utils/paginator.py": {
+      "bytes": 28555,
+      "sha256": "87b907f039a5592c5d68a9da915424e58b8ad1320901dc41209b2f8f68544b9f"
+    },
+    "source/apps/api/plane/tests/unit/utils/test_paginator_evaluation.py": {
+      "bytes": 8771,
+      "sha256": "966cdcdf71b64dc70b4512f9ce7e15c20875bda160d25704dbea8479c1b8706b"
+    },
+    "source/apps/api/plane/tests/contract/test_paginator_evaluation.py": {
+      "bytes": 12143,
+      "sha256": "c199e6946d061c3a87e6293b32ee7471b09e30e2820599ef44804b712ddd5f64"
+    },
+    "source/apps/api/plane/tests/contract/api/test_work_item_pagination_evaluation.py": {
+      "bytes": 11083,
+      "sha256": "35ab857e01359bca41344a6db8dab5b8c2fa85b1fe4356ee93468b6393a35328"
+    },
+    "application.patch": {
+      "bytes": 36352,
+      "sha256": "6f03a47790e937adc6a7c946b475371cbb59e13c9fbc45c623ebe0323247eff7"
+    }
+  },
+  "publication_check": {
+    "explicit_allowlist": true,
+    "patterns_checked": [
+      "private_key",
+      "github_token",
+      "credential_uri",
+      "private_windows_path"
+    ],
+    "matches": 0,
+    "limits": "Pattern checks are not a proof against all sensitive strings; fixtures are synthetic and files were reviewed separately."
+  }
+}
