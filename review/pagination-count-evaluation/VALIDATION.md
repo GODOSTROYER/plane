@@ -1,59 +1,50 @@
-# Pagination count validation — 6 October 2026
+# Pagination count validation, 13 October 2026
 
-This report records real Linux/Django/PostgreSQL validation of the candidate originally published in fork PR #3 at `b8a8da65124432ea7758a1afbc3f2c263eb69872`. It supersedes the earlier packet's pending-validation status. The original offline records remain historical evidence, not database test results.
+This is the current report for upstream draft #9953. The application base remains `7466675e471efe1c96b122615f7a0d30c9b2eb05`; the independently reviewed submitted revision was `dfebab8fa3bbb4be9bcda9703797e762d106332b`. The [dated manifest](evidence/linux-20261013/manifest.json) identifies the revised application tree and exact five source files. The upstream contribution contains two production files and three test files; this evidence packet stays on the fork.
 
-The application baseline is upstream `7466675e471efe1c96b122615f7a0d30c9b2eb05`. Production changes remain confined to `apps/api/plane/utils/paginator.py`; the other three contribution files are regression tests. The upstream contribution excludes this review packet.
+## Finding and correction
 
-## Corrections made during validation
+The reported lazy-wrapper regression reproduced with real Django/PostgreSQL and JSON rendering inside the SQL capture. A callback wrapping a values queryset in a mapping or list caused submitted Stage B to issue COUNT followed by the row SELECT. The baseline uses one SELECT and reuses its cache. Extending the reproduction to controller wrappers and a deferred model projection produced five failing cases on the submitted paginator; all five pass on pristine and revised implementations. These are five cases of one generic callback boundary defect, not five independent bugs or observed failures in a production endpoint.
 
-The first real focused run produced 98 passes and seven failures. The new HTTP fixtures requested `order_by=name`, which is not in `ISSUE_ORDER_BY_ALLOWLIST`; the endpoint correctly substituted its default ordering. The tests' expected insertion order was therefore wrong. The tests and benchmark now request the supported `sequence_id` ordering. Exact response identity assertions were retained. Three test files were formatted with the repository's Ruff configuration. No production-code correction was necessary.
+Stage A is unchanged: select the supplied count queryset with `is not None`, then call `.count()`. This avoids hydrating every matching model and respects an explicitly empty count source. Callers must supply equivalently scoped count and page querysets.
 
-The benchmark explicitly sets `DEBUG=False` and records it. SQL capture, model-construction instrumentation, allocation tracing, and EXPLAIN probes are separate from timing. Resetting the synthetic API key's throttle history is correctly described as a throttle operation, not an authentication-cache reset.
+Stage B now requires `count_page_in_database=True`. The default evaluates the original page as before, preserving its cache for lazy wrappers and generators. Only the ungrouped app project work-item list opts in: its `issue_on_results` callback eagerly materializes a values projection. The API documents this caller contract. The existing standard-result, sliced-queryset, row-lock and direct-raw-response guards remain. No recursive response inspection or transformed-output cardinality inference was added. Other endpoints retain default behavior.
 
-## Real-stack results
+## Current verification
 
 | Check | Result |
 | --- | --- |
-| Focused suite: 100 new cases and five existing paginator tests | 105 passed |
-| Complete backend suite with the candidate | 800 passed; 92 warnings |
-| Complete backend suite on pristine production source, with the same new tests copied in | 767 passed; 33 expected regression failures; 92 warnings; zero errors |
-| Existing tests on the pristine base | All 700 passed |
-| Isolated compatibility run with upstream #9948's next-page optimization and its tests | 116 passed |
-| Changed-file Ruff lint and formatting | Passed |
-| Django system check | No issues |
-| Migration drift | No changes detected |
-| Exact API workflow lint command in a disposable source copy | Exit 0; fixed three existing unused imports in that copy |
+| Full Linux backend collection | **810 passed = 700 existing + 110 contribution cases**, 92 warnings |
+| Focused collection | **115 passed = 110 contribution + five existing cases**; subset of the full run |
+| Lazy wrappers/generator on submitted paginator | Five expected failures, no setup/collection errors |
+| Same five on pristine paginator | Five passed |
+| Same five on revised paginator | Passed in focused and full collections |
+| Focused combination with #9948 at `0b3afeac9c58e25c6a527ff7ffd39c9bae83f653` | **126 passed = 115 focused + 11 adjacent tests**; not an independent full combined-backend run |
+| Revised query-shape benchmark | 14 cases, four variants each; response identity/count/cursor/hash checks passed |
+| Ruff lint on all five contribution files | Passed |
+| Formatting | Four original contribution files passed; changed view range 390-405 passed; unrelated pre-existing view formatting left unchanged |
+| Django system / migration-drift checks | No issues / no changes detected |
 
-The 33 baseline failures are confined to the new suites: 12 orchestration, 13 ORM, and eight HTTP cases. They expose count-queryset evaluation, unnecessary model hydration, and the explicitly empty count-source fallback. There were no baseline collection, setup, or infrastructure errors. The candidate passes the same cases.
+All current tests ran in the repository's isolated Linux Docker stack with Python 3.12.5, Django 5.2.17 and PostgreSQL. The full suite used `--nomigrations`; migration-drift checks do not establish execution of every historical migration. The 92 warnings are four factory_boy save deprecations and 88 openpyxl UTC timestamp deprecations, the same categories recorded on pristine source. Existing repository-wide unused imports remain outside this patch. Hosted CI and maintainer approval are separate from local execution.
 
-The 92 warnings occur on both revisions: four `factory_boy` post-generation-save deprecations and 88 `openpyxl` UTC timestamp deprecations. None originates in the new tests or paginator. Read-only repository lint on both revisions reports the same three unused imports in `app/views/issue/sub_issue.py` and `app/views/project/invite.py`; those unrelated files are excluded from the contribution.
+The unchanged HTTP collection includes permission/filter scope, exact page identities and cursor round trips, grouping, and a real TCP API-key request. ORM coverage retains cached/raw querysets, callback/controller cardinality, DISTINCT/window queries and cross-connection row locks. Capturing aliases does not establish a real primary/replica deployment.
 
-Coverage includes page boundaries and cursor round trips, exact returned identities, permission/filter scope, empty results, grouping/subgrouping, custom callback/controller cardinality, cached/raw querysets, sliced and unsliced DISTINCT, window queries, and cross-connection PostgreSQL row-lock acquisition/release. Public requests use API-key authentication; app requests use the existing force-authenticated test client and do not validate login. A public request also runs over a real TCP socket. Only recent-visit task dispatch is mocked in the new request tests.
+## Measurements and interpretation
 
-## Performance decision
+See the [readable table](evidence/linux-20261013/BENCHMARKS.md), [unzipped machine-readable summary and raw timing samples](evidence/linux-20261013/summary.json), and [complete evidence archive](evidence/linux-20261013/linux-validation.zip).
 
-Retain both production changes. Six workloads (100, 1,000, and 10,000 matching work items, each with empty or 4-KiB description payloads per representation) passed response-equivalence checks on both public and app endpoints. Each uses a fixed 20-item page and 20 randomized trials per variant after two warmups. [The complete table](evidence/linux-20261006/BENCHMARKS.md) includes medians and IQRs for baseline, count-source-only, and combined implementations.
+The new matrix uses default ordering, a sequence_id control, app priority ordering, first/middle/last/beyond-last pages, sizes 20 and 100, a selective app filter, and populated label/assignee/module relationships. It is one 1,000-row synthetic project with approximately 4 KiB in EACH of four description representations, not 4 KiB total per row. It compares pristine, Stage A only, submitted automatic Stage B and revised opt-in Stage B. Timings use ten randomized trials after two warmups; query counts, model construction, Python allocations and EXPLAIN ANALYZE are separate probes. Full payload hashes and expected ordered identities/counts/cursors match.
 
-At 1,000 items with 4-KiB descriptions, public median duration was 242.1 / 52.7 / 53.2 ms; app median was 243.5 / 48.4 / 43.9 ms. SQL statements stayed at nine and seven respectively. Baseline constructed 1,020 issue models on either endpoint; count-source-only constructed 20; the combined implementation constructed 20 for the public serializer and zero for the app projection. This is reduced hydration, not reduced statement count.
+Most measured improvement comes from Stage A. Opted-in Stage B removes raw-page model constructions in the app projection but does not remove a SQL statement. No claim of universally faster execution, zero allocation, constant runtime, production latency or statistical significance is made. Real replicas, concurrent throughput, process RSS and production traffic remain unmeasured.
 
-The count-source correction supplies most of the gain and removes work proportional to the matching population. The page-metadata change additionally avoids the app's 20 raw-page model constructions and their allocation cost. It is not consistently faster in every small case: for 100 items with empty descriptions, app medians were 33.9 ms for count-source-only and 34.7 ms combined, with overlapping IQRs. These trials do not establish statistical significance for close differences. Both stages preserve measured responses, while regression tests protect the intended loading behavior.
+The tradeoff is visible in the fresh matrix: the app page-size-100 default case measured 78.7 ms for Stage A alone versus 61.4 ms with opt-in Stage B, while the filtered app case measured 47.6 versus 49.5 ms. These ten-trial local medians support preserving the bounded optimization, not claiming a win for every workload. SQL counts stay unchanged (nine public statements on populated pages and seven app statements in this fixture).
 
-At 10,000 items with 4-KiB descriptions, combined medians were 110.6 ms public and 825.1 ms app, versus 2,380.5 and 2,345.9 ms baseline. The app still performs substantial database/projection work as the population grows; bounded model hydration must not be described as constant request cost. Existing annotation, sorting, and filtering costs are outside this patch.
+The initial matrix failed because its public priority expectation invented a tie-breaker absent from that endpoint. That case was removed from this deterministic-order matrix; the supported app priority case remains. A second attempt assumed high-before-low app priority; source inspection confirmed the current paginator maps priority to descending priority_order (low-before-high). Its exact expectation was corrected without changing the endpoint. Both unsuccessful harnesses/logs/XML are retained. Production code was not changed to accommodate it.
 
-Raw trials, parameterized SQL, representative EXPLAIN ANALYZE plans, dependency versions, source files, original failed-fixture logs, corrected test logs, and JUnit results are in [the 38-member evidence archive](evidence/linux-20261006/linux-validation.zip). [The manifest](evidence/linux-20261006/manifest.json) and [SHA256 checksums](evidence/linux-20261006/SHA256SUMS) identify the artifacts. Logs/source are normalized to LF for portability; the manifest records both canonical and tested runtime-byte hashes. Archive CRCs and member hashes were verified. The publication check uses an explicit file allowlist plus credential/path pattern checks; this is not a guarantee against every possible sensitive string.
+## Historical evidence and adjacent work
 
-## Environment and evidence boundaries
+The [6 October report](evidence/linux-20261006/VALIDATION-HISTORICAL.md) and archive remain preserved. Their 800 total, 100 contribution, 105 focused and 116 combined-focused counts apply to the earlier revision. Its 33 baseline failures were regression cases, not 33 independent bugs. Its six datasets were three population sizes times two body widths, each exercised on both surfaces. These historical results must not be added to current totals or called fresh runs of the revised implementation.
 
-Python 3.12.5, Django 5.2.17, Ruff 0.9.7, and PostgreSQL 15.7, using the repository's Linux Docker Compose stack on Docker Desktop. Docker reported 22 CPUs and 16,459,132,928 bytes of memory. All fixtures are synthetic and services are disposable. Exact installed dependency versions are recorded with the evidence.
+#9948 removes a different next-page count probe; its code is not included here. The current focused combination is useful but does not replace a full test run of an eventual merged tree. Fork PR #2's RowPreservingList design remains separate and was not combined or comparatively benchmarked. Existing upstream #9947/#9952 are unchanged. This PR remains a draft.
 
-The benchmark compares the complete exported baseline method, the same method with only count-source selection corrected, and the combined candidate. This is an in-process controlled comparison, not three deployed environments. The pristine-base test run above is a separate experiment.
-
-The patch removes unnecessary model construction; it does not make total runtime constant, remove every database statement, or provide a transactionally consistent response snapshot. Actual replica routing/lag, production traffic, concurrent throughput, and process peak RSS are not measured. Python allocation probes are not RSS measurements. Hosted CI and maintainer approval are separate from these local results.
-
-## Alternative and adjacent work
-
-Fork PR #2 uses a `RowPreservingList` callback marker instead of the count-based metadata strategy. That approach avoids an additional count after projection but changes the callback contract and the grouper. It has not been combined with this candidate or benchmarked here; no claim of universal superiority over that alternative is made.
-
-Upstream #9948 independently removes the existing next-page COUNT. This candidate retains that probe and addresses separate evaluation costs. An isolated runner combined that change from `0b3afeac9c58e25c6a527ff7ffd39c9bae83f653` with this candidate and its 11 additional tests: all 116 focused cases passed. The submitted implementation does not incorporate #9948's code. Other nearby proposals (#9906, #9486, #9429) concern page/cursor input handling rather than these count paths. The targeted open-PR search found #9948 as adjacent work, not a direct duplicate; unpublished work cannot be ruled out.
-
-See `REPRODUCE.md` for runnable commands and the evidence manifest for exact source identities and raw results.
+See [reproduction commands](REPRODUCE.md), [source/member manifest](evidence/linux-20261013/manifest.json) and [checksums](evidence/linux-20261013/SHA256SUMS).

@@ -1,16 +1,12 @@
-# Reproduce the real-stack validation
+# Reproduce the current validation
 
-Use the application files already applied on this fork review branch. Do not reapply the historical patches. The new `VALIDATION.md` and dated Linux evidence describe the completed run; older offline records describe earlier work.
-
-## Setup and application checks
-
-Requirements: Git, Python 3, Docker with Linux containers, and sufficient local disk/memory. Commands below use Bash from the repository root. PowerShell users can use equivalent absolute bind mounts. Run the validation commands sequentially; do not share the same test database between simultaneous pytest processes.
+Use a disposable checkout of this evidence revision. Application files are already applied. Requirements: Docker with Linux containers, Git and Python 3. Commands use Bash at the repository root. Do not share the test database with concurrent pytest runs.
 
 ```sh
 export KIT="$PWD/review/pagination-count-evaluation"
 export OUT="$PWD/pagination-validation-output"
 mkdir -p "$OUT"
-# Only in a fresh disposable checkout with no existing local environment:
+# Only in a fresh checkout without an existing local .env:
 cp apps/api/.env.example apps/api/.env
 python - <<'PY'
 from pathlib import Path
@@ -18,22 +14,12 @@ import secrets
 with Path('apps/api/.env').open('a') as f:
     f.write('\nSECRET_KEY=' + secrets.token_urlsafe(48) + '\n')
 PY
-
-docker compose -p plane-pagination-review -f docker-compose-test.yml \
-  run --rm --build -v "$OUT:/verification-output" api-tests \
-  pytest plane/tests --nomigrations -o addopts='' -q \
-  --junitxml=/verification-output/full-backend.xml
-
-docker compose -p plane-pagination-review -f docker-compose-test.yml \
-  run --rm --entrypoint /bin/sh api-tests -ec '
-    python -m ruff check plane/utils/paginator.py plane/tests/unit/utils/test_paginator_evaluation.py plane/tests/contract/test_paginator_evaluation.py plane/tests/contract/api/test_work_item_pagination_evaluation.py
-    python -m ruff format --check plane/utils/paginator.py plane/tests/unit/utils/test_paginator_evaluation.py plane/tests/contract/test_paginator_evaluation.py plane/tests/contract/api/test_work_item_pagination_evaluation.py
-    python manage.py check
-    python manage.py makemigrations --check --dry-run
-  '
+docker compose -p plane-pagination-review -f docker-compose-test.yml run --rm --build \
+  -v "$OUT:/verification-output" api-tests pytest plane/tests --nomigrations \
+  -o addopts='' -q --junitxml=/verification-output/full-backend.xml
 ```
 
-The focused command substitutes these four test paths for `plane/tests`:
+Expected full result: 810 tests pass. For the focused collection, replace `plane/tests` with these four paths (115 cases):
 
 ```text
 plane/tests/unit/utils/test_paginator.py
@@ -42,56 +28,59 @@ plane/tests/contract/test_paginator_evaluation.py
 plane/tests/contract/api/test_work_item_pagination_evaluation.py
 ```
 
-Repository-wide read-only Ruff currently finds three pre-existing unused imports. The actual API workflow's `ruff check --fix apps/api` passes by correcting them; reproduce that command only in a disposable copy, since it writes to unrelated files. The dated evidence includes the exact checks script used for this comparison.
-
-## Baseline regression verification
+Run checks using the exact script copied out of the archive:
 
 ```sh
-git worktree add --detach ../plane-pagination-base 7466675e471efe1c96b122615f7a0d30c9b2eb05
-export BASE="$(cd ../plane-pagination-base && pwd)"
-for path in \
-  plane/tests/unit/utils/test_paginator_evaluation.py \
-  plane/tests/contract/test_paginator_evaluation.py \
-  plane/tests/contract/api/test_work_item_pagination_evaluation.py; do
-  cp "apps/api/$path" "$BASE/apps/api/$path"
+python - <<'PY'
+import os, zipfile
+from pathlib import Path
+with zipfile.ZipFile(Path(os.environ['KIT'])/'evidence/linux-20261013/linux-validation.zip') as z:
+    Path(os.environ['OUT'],'checks.sh').write_bytes(z.read('run/checks.sh'))
+PY
+docker compose -p plane-pagination-review -f docker-compose-test.yml run --rm \
+  -v "$OUT:/verification-output" --entrypoint /bin/sh api-tests /verification-output/checks.sh
+```
+
+The script checks Ruff on five files, formatting on four full files plus the changed view range, Django system checks and migration drift. It leaves unrelated existing formatting/import issues untouched. The entrypoint override does not install test requirements, so its dependency freeze describes the base check image; the archive also contains a separate full test dependency freeze.
+
+## Reproduce the callback finding
+
+Export pinned sources, without replacing the checkout:
+
+```sh
+git show 7466675e471efe1c96b122615f7a0d30c9b2eb05:apps/api/plane/utils/paginator.py > "$OUT/baseline-paginator.py"
+git show dfebab8fa3bbb4be9bcda9703797e762d106332b:apps/api/plane/utils/paginator.py > "$OUT/submitted-paginator.py"
+for variant in submitted baseline; do
+  docker compose -p plane-pagination-review -f docker-compose-test.yml run --rm \
+    -v "$OUT:/verification-output" \
+    -v "$OUT/$variant-paginator.py:/code/plane/utils/paginator.py:ro" api-tests \
+    pytest plane/tests/contract/test_paginator_evaluation.py \
+    -k 'lazy_wrapped or deferred_model' --nomigrations -o addopts='' -vv \
+    --junitxml="/verification-output/$variant-wrappers.xml"
 done
-
-# This overrides /code in an ephemeral runner, preserving both worktrees.
-# It reuses only this task's disposable services, after the candidate run exits.
-docker compose -p plane-pagination-review -f docker-compose-test.yml \
-  run --rm -v "$BASE/apps/api:/code" -v "$OUT:/verification-output" api-tests \
-  pytest plane/tests --nomigrations -o addopts='' -q \
-  --junitxml=/verification-output/baseline-full.xml
 ```
 
-Expected baseline exit code is 1: 33 new regression failures and 767 passes, with no errors. All 700 pre-existing tests pass. Keep this result separate from successful candidate execution.
+Expected: submitted exits 1 with five assertion failures; baseline exits 0 with five passes. Revised code passes those five in the normal focused/full runs. Rendering is inside SQL capture. This isolates the paginator finding, not a full baseline rerun.
 
-## Performance measurements
-
-Export the complete, verified baseline source from Git:
+## Current benchmark
 
 ```sh
-python "$KIT/tools/export_baseline.py" --repo "$PWD" --output "$OUT/paginator-baseline.py"
-```
-
-Run the corrected benchmark in a disposable runner. Its bind-mounted test file is not added to the application source tree or upstream contribution. This command measures one workload; repeat `PLANE_BENCH_ROWS` at 100, 1000, and 10000, each with `PLANE_BENCH_BODY_BYTES` set to 0 and 4096, without concurrent test/benchmark activity.
-
-```sh
-docker compose -p plane-pagination-review -f docker-compose-test.yml \
-  run --rm -v "$OUT:/verification-output" \
-  -v "$KIT/tools/test_pagination_benchmark.py:/code/plane/tests/test_pagination_benchmark.py:ro" \
+docker compose -p plane-pagination-review -f docker-compose-test.yml run --rm \
+  -v "$OUT:/verification-output" \
+  -v "$KIT/tools/test_query_shapes.py:/code/plane/tests/test_query_shapes.py:ro" \
   -e PLANE_RUN_PAGINATION_BENCHMARK=1 \
-  -e PLANE_PAGINATION_BASELINE_FILE=/verification-output/paginator-baseline.py \
-  -e PLANE_BENCH_ROWS=1000 -e PLANE_BENCH_BODY_BYTES=4096 \
-  -e PLANE_BENCH_TRIALS=20 \
-  -e PLANE_BENCH_OUTPUT=/verification-output/benchmark-1000-4096.json \
-  api-tests pytest plane/tests/test_pagination_benchmark.py \
-  --nomigrations -o addopts='' -q -s
+  -e PLANE_PAGINATION_BASELINE_FILE=/verification-output/baseline-paginator.py \
+  -e PLANE_PAGINATION_SUBMITTED_FILE=/verification-output/submitted-paginator.py \
+  -e PLANE_BENCH_ROWS=1000 -e PLANE_BENCH_BODY_BYTES=4096 -e PLANE_BENCH_TRIALS=10 \
+  -e PLANE_BENCH_OUTPUT=/verification-output/query-shapes.json api-tests \
+  pytest plane/tests/test_query_shapes.py --nomigrations -o addopts='' -q -s
 ```
 
-The harness refuses non-test databases and requires PostgreSQL. Each workload compares the baseline, the count-source-only fix, and the combined candidate. It uses two warmups per variant/surface followed by 20 randomized trials, `DEBUG=False`, and a fixed page size of 20. Public responses use sparse `id,name` fields; app responses use their ordinary projection. The app client is force-authenticated and recent-visit dispatch is mocked. Public authentication is real; its synthetic token's rate-limit history is reset before each request outside the timed section.
+This one pytest case executes 14 scenarios, each with baseline, Stage A only, submitted automatic Stage B and revised opt-in variants. Old variants strip only the new keyword from the current call site; their original paginator methods/defaults remain intact. The matrix deliberately requires 1,000 rows because offsets and expected filters are specified for that population. All timing/probe/fixture limits are documented in BENCHMARKS.md and the executable harness. Public authentication uses a random synthetic token; its throttle bucket is reset outside timings. App authentication is forced and recent-visit dispatch is mocked. DEBUG=False. The timer includes response parsing and assertions. It excludes SQL capture, allocation tracing and EXPLAIN.
 
-The timer includes APIClient request handling and JSON parsing. It excludes TCP, SQL capture, model-construction instrumentation, allocation tracing, and EXPLAIN ANALYZE, which have separate probes. Payload hashes must agree across all variants and trials. Raw timings, medians/IQR/p95, SQL, query plans, constructed-model counts, and a separate Python-allocation peak are recorded. These are local observations, not production forecasts or statistical significance claims.
+## Adjacent PR compatibility
+
+The archive includes the exact #9948 test file and the locally combined paginator source. Bind them over `plane/tests/unit/utils/test_paginator.py` and `plane/utils/paginator.py`, then run the four focused paths above. Expected: 126 cases. The archive's preparation script records the three source replacements and verifies the adjacent test Git blob. This is not a full combined-backend run or authority to include #9948 in the patch.
 
 ## Cleanup
 
@@ -99,4 +88,4 @@ The timer includes APIClient request handling and JSON parsing. It excludes TCP,
 docker compose -p plane-pagination-review -f docker-compose-test.yml down -v
 ```
 
-This removes only the named disposable stack. Retain the output and worktrees for review. Never run this against a production project or reuse a production environment file.
+Remove only this named disposable stack. Preserve output. Docker may create an empty host file at a new bind-mount test path; remove it only after verifying it is empty and untracked. Never reuse a production environment or database.

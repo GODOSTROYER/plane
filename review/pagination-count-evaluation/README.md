@@ -1,35 +1,21 @@
-# Pagination count optimization — validation packet
+# Pagination count validation packet
 
-Start with **[the completed validation report](VALIDATION.md)** and **[reproduction commands](REPRODUCE.md)**. The application and tests are already applied at their normal repository paths; do not reapply the historical patches.
+Start with **[VALIDATION.md](VALIDATION.md)**, the authoritative current report, and [REPRODUCE.md](REPRODUCE.md). Application code is already applied at its normal paths. Do not apply historical patches over it.
 
-## Verified on 6 October 2026
+Validated 13 October 2026: **810 backend tests passed**, including 110 contribution cases. The lazy-wrapper regression is reproduced and fixed by making raw-page SQL counting an explicit opt-in for the known eager app projection. A bounded 14-case query-shape matrix passed, with four variants and identical response hashes.
 
-- 800 backend tests passed in the repository's Linux Docker/PostgreSQL stack, including all 100 new cases.
-- Pristine production source with the same tests: 33 new regression failures, 767 passes, zero errors. All 700 existing tests passed.
-- 105 focused tests passed; a separate integration with upstream #9948 passed 116 tests.
-- Changed-file lint/formatting, Django system checks, and migration checks passed.
-- Six benchmark workloads passed on public/app endpoints with identical responses across baseline, count-source-only, and combined implementations.
+- [Current benchmark table](evidence/linux-20261013/BENCHMARKS.md)
+- [Machine-readable results and raw timing samples](evidence/linux-20261013/summary.json)
+- [Raw logs, plans, SQL, sources and harness](evidence/linux-20261013/linux-validation.zip)
+- [Manifest](evidence/linux-20261013/manifest.json) and [checksums](evidence/linux-20261013/SHA256SUMS)
+- [Application-only patch](evidence/linux-20261013/application.patch)
+- [Change since submitted revision](evidence/linux-20261013/review-fix.patch)
+- [Current upstream draft description](PR_DRAFT.md)
 
-The 92 dependency warnings and three unrelated unused-import findings also occur on the pristine base. Hosted checks and maintainer review are separate. Production traffic, real replicas, concurrent throughput, and process peak RSS were not measured.
-
-## Current evidence
-
-- [Validation and design assessment](VALIDATION.md)
-- [Reproduction commands](REPRODUCE.md)
-- [Complete benchmark table](evidence/linux-20261006/BENCHMARKS.md)
-- [Machine-readable summary](evidence/linux-20261006/summary.json)
-- [Raw logs, trials, SQL, plans, and tested sources](evidence/linux-20261006/linux-validation.zip)
-- [Source/member manifest](evidence/linux-20261006/manifest.json) and [checksums](evidence/linux-20261006/SHA256SUMS)
-- [Application-only patch](evidence/linux-20261006/application.patch)
-- [Upstream PR description](PR_DRAFT.md)
-- [Corrected real-stack benchmark](tools/test_pagination_benchmark.py)
-
-The official submission uses a separate application-only branch. This fork review branch retains the evidence packet. Existing upstream PRs #9947/#9952, fork PR #2, and the fork's preview were not changed.
+The full collection used --nomigrations; migration-drift checks, hosted CI and maintainer review are distinct. The 115 focused cases are a subset of 810. The 126-case adjacent-PR check is focused combination evidence, not another full backend run.
 
 ## Historical material
 
-[HANDOFF.md](HANDOFF.md), [RESEARCH_AND_DECISION.md](RESEARCH_AND_DECISION.md), [PUBLICATION.md](PUBLICATION.md), and the original [evidence guide](evidence/README.md) describe the initial offline preparation and earlier publication scope. Their pending-validation statements are superseded by VALIDATION.md. The subsequent explicit instruction authorizes preparing an upstream draft; no merge is authorized.
+The 6 October evidence and [previous report](evidence/linux-20261006/VALIDATION-HISTORICAL.md) are historical. HANDOFF.md, RESEARCH_AND_DECISION.md, PUBLICATION.md, original candidate copies and offline tools describe earlier revisions and are superseded by the current report where they differ. Preserve their provenance; do not use them to overwrite current code or infer current test results. Fork PR #2 is a separate design, unchanged.
 
-The original candidate/ copies, offline tools, source manifest, and separable patches remain available for provenance. The corrected application files and dated evidence manifest are authoritative for this validation. Do not collect the review directory as part of the backend suite or overwrite old evidence when rerunning offline tools.
-
-Fork [PR #2](https://github.com/GODOSTROYER/plane/pull/2) uses a different RowPreservingList design. It remains unchanged and was not combined with this implementation. Read the validation report for the tradeoff; the current measurements do not compare the two designs directly.
+The official draft contains only application code and regression tests. This fork branch contains the evidence. Nothing is merged.

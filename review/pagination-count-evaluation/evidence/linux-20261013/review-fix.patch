@@ -1,0 +1,342 @@
+diff --git a/apps/api/plane/app/views/issue/base.py b/apps/api/plane/app/views/issue/base.py
+index 3b8b05a6a..ffb4c0aff 100644
+--- a/apps/api/plane/app/views/issue/base.py
++++ b/apps/api/plane/app/views/issue/base.py
+@@ -399,6 +399,8 @@ class IssueViewSet(BaseViewSet):
+                 queryset=issue_queryset,
+                 total_count_queryset=filtered_issue_queryset,
+                 on_results=lambda issues: issue_on_results(group_by=group_by, issues=issues, sub_group_by=sub_group_by),
++                # issue_on_results eagerly materializes its values projection.
++                count_page_in_database=True,
+             )
+ 
+     @allow_permission([ROLE.ADMIN, ROLE.MEMBER])
+diff --git a/apps/api/plane/tests/contract/test_paginator_evaluation.py b/apps/api/plane/tests/contract/test_paginator_evaluation.py
+index 8e843a6ea..a53334fd5 100644
+--- a/apps/api/plane/tests/contract/test_paginator_evaluation.py
++++ b/apps/api/plane/tests/contract/test_paginator_evaluation.py
+@@ -139,7 +139,11 @@ def test_projected_page_count_does_not_rehydrate_original_page(user_ids, page):
+     count_queryset = fresh_users(user_ids)
+     with capture_statements() as statements, mock.patch.object(User, "from_db", wraps=User.from_db) as hydrate:
+         response = BasePaginator().paginate(
+-            request(page), queryset=fresh_users(user_ids), total_count_queryset=count_queryset, on_results=project
++            request(page),
++            queryset=fresh_users(user_ids),
++            total_count_queryset=count_queryset,
++            on_results=project,
++            count_page_in_database=True,
+         )
+     assert response.data["results"] == expected
+     assert response.data["count"] == len(expected)
+@@ -165,7 +169,9 @@ def test_transformed_cardinality_does_not_replace_raw_page_count(user_ids, kind)
+         return projected[:1] if kind == "filter" else {"items": projected}
+ 
+     with mock.patch.object(User, "from_db", wraps=User.from_db) as hydrate:
+-        response = BasePaginator().paginate(request(), paginator=StaticPaginator(raw), on_results=transform)
++        response = BasePaginator().paginate(
++            request(), paginator=StaticPaginator(raw), on_results=transform, count_page_in_database=True
++        )
+     assert response.data["count"] == 9
+     assert len(response.data["results"]) == 1
+     assert raw._result_cache is None
+@@ -184,7 +190,9 @@ def test_raw_or_serialized_page_is_fetched_only_once(user_ids, callback_kind):
+ 
+     callback = {"none": None, "passthrough": passthrough, "serialize": serialize}[callback_kind]
+     with capture_statements() as statements, mock.patch.object(User, "from_db", wraps=User.from_db) as hydrate:
+-        response = BasePaginator().paginate(request(), paginator=StaticPaginator(page), on_results=callback)
++        response = BasePaginator().paginate(
++            request(), paginator=StaticPaginator(page), on_results=callback, count_page_in_database=True
++        )
+         list(response.data["results"])
+     assert response.data["count"] == 4
+     assert hydrate.call_count == 4
+@@ -196,7 +204,10 @@ def test_grouped_annotation_count_keeps_raw_queryset_cardinality(user_ids):
+     raw = fresh_users(user_ids).order_by().values("is_active").annotate(user_count=Count("pk"))
+     with capture_statements() as statements, mock.patch.object(User, "from_db", wraps=User.from_db) as hydrate:
+         response = BasePaginator().paginate(
+-            request(), paginator=StaticPaginator(raw), on_results=lambda rows: list(rows.values("user_count"))
++            request(),
++            paginator=StaticPaginator(raw),
++            on_results=lambda rows: list(rows.values("user_count")),
++            count_page_in_database=True,
+         )
+     assert response.data["count"] == 1
+     assert response.data["results"] == [{"user_count": 9}]
+@@ -212,7 +223,10 @@ def test_window_filtered_page_is_counted_without_hydration(user_ids):
+     )
+     with mock.patch.object(User, "from_db", wraps=User.from_db) as hydrate:
+         response = BasePaginator().paginate(
+-            request(), paginator=StaticPaginator(raw), on_results=lambda rows: list(rows.values("id", "position"))
++            request(),
++            paginator=StaticPaginator(raw),
++            on_results=lambda rows: list(rows.values("id", "position")),
++            count_page_in_database=True,
+         )
+     assert response.data["count"] == 2
+     assert len(response.data["results"]) == 2
+@@ -223,7 +237,9 @@ def test_window_filtered_page_is_counted_without_hydration(user_ids):
+ def test_values_queryset_input_remains_supported(user_ids):
+     raw = fresh_users(user_ids).values("id", "first_name")[:4]
+     with capture_statements() as statements:
+-        response = BasePaginator().paginate(request(), paginator=StaticPaginator(raw), on_results=list)
++        response = BasePaginator().paginate(
++            request(), paginator=StaticPaginator(raw), on_results=list, count_page_in_database=True
++        )
+     assert response.data["count"] == 4
+     assert len(response.data["results"]) == 4
+     assert len(statements) == 1
+@@ -250,7 +266,9 @@ def test_locking_page_still_acquires_and_releases_row_locks(user_ids):
+     with ThreadPoolExecutor(max_workers=1) as executor:
+         with transaction.atomic(using="default"):
+             raw = fresh_users(user_ids).select_for_update()[:9]
+-            response = BasePaginator().paginate(request(), paginator=StaticPaginator(raw), on_results=lambda _: [])
++            response = BasePaginator().paginate(
++                request(), paginator=StaticPaginator(raw), on_results=lambda _: [], count_page_in_database=True
++            )
+             assert response.data["count"] == 9
+             assert executor.submit(try_lock).result(timeout=10) == "locked"
+         assert executor.submit(try_lock).result(timeout=10) == "acquired"
+@@ -264,7 +282,10 @@ def test_unsliced_ordering_sensitive_distinct_preserves_original_length(user_ids
+     expected = list(raw.all())
+     assert len(expected) == 9
+     response = BasePaginator().paginate(
+-        request(), paginator=StaticPaginator(raw), on_results=lambda rows: list(rows.values("is_active"))
++        request(),
++        paginator=StaticPaginator(raw),
++        on_results=lambda rows: list(rows.values("is_active")),
++        count_page_in_database=True,
+     )
+     assert response.data["results"] == expected
+     assert response.data["count"] == len(expected)
+@@ -276,9 +297,66 @@ def test_sliced_ordering_sensitive_distinct_keeps_the_page_boundary(user_ids):
+     assert len(expected) == 4
+     with capture_statements() as statements:
+         response = BasePaginator().paginate(
+-            request(), paginator=StaticPaginator(raw), on_results=lambda rows: list(rows.values("is_active"))
++            request(),
++            paginator=StaticPaginator(raw),
++            on_results=lambda rows: list(rows.values("is_active")),
++            count_page_in_database=True,
+         )
+     assert response.data["results"] == expected
+     assert response.data["count"] == 4
+     assert raw._result_cache is None
+     assert any("COUNT(" in item["sql"].upper() for item in statements)
++
++
++@pytest.mark.parametrize("wrapper_kind", ["mapping", "list"])
++@pytest.mark.parametrize("wrapper_stage", ["callback", "controller"])
++def test_lazy_wrapped_values_page_does_not_gain_a_count_query(user_ids, wrapper_kind, wrapper_stage):
++    import json
++
++    from rest_framework.renderers import JSONRenderer
++
++    raw = fresh_users(user_ids).values("id", "first_name")[:4]
++    expected = json.loads(JSONRenderer().render(list(raw.all())))
++
++    def wrap(rows):
++        return {"items": rows} if wrapper_kind == "mapping" else [rows]
++
++    with capture_statements() as statements:
++        response = BasePaginator().paginate(
++            request(),
++            paginator=StaticPaginator(raw),
++            on_results=wrap if wrapper_stage == "callback" else lambda rows: rows,
++            controller=wrap if wrapper_stage == "controller" else None,
++        )
++        # Rendering belongs INSIDE the query capture. Returning Response alone
++        # does not consume a lazy queryset inside a list/dict wrapper.
++        rendered = json.loads(JSONRenderer().render(response.data))
++
++    rows = rendered["results"]["items"] if wrapper_kind == "mapping" else rendered["results"][0]
++    assert rendered["count"] == len(rows) == 4
++    assert rows == expected
++    assert raw._result_cache is not None
++    assert len(statements) == 1, statements
++
++
++def test_deferred_model_projection_reuses_the_page_cache_by_default(user_ids):
++    import json
++
++    from rest_framework.renderers import JSONRenderer
++
++    raw = fresh_users(user_ids)[:4]
++    expected_ids = [str(pk) for pk in raw.values_list("id", flat=True)]
++
++    def defer_projection(rows):
++        for user in rows:
++            yield {"id": user.id}
++
++    with capture_statements() as statements, mock.patch.object(User, "from_db", wraps=User.from_db) as hydrate:
++        response = BasePaginator().paginate(request(), paginator=StaticPaginator(raw), on_results=defer_projection)
++        rendered = json.loads(JSONRenderer().render(response.data))
++
++    assert rendered["count"] == 4
++    assert [row["id"] for row in rendered["results"]] == expected_ids
++    assert raw._result_cache is not None
++    assert hydrate.call_count == 4
++    assert len(statements) == 1, statements
+diff --git a/apps/api/plane/tests/unit/utils/test_paginator_evaluation.py b/apps/api/plane/tests/unit/utils/test_paginator_evaluation.py
+index 662d9a8c1..a04fd1daa 100644
+--- a/apps/api/plane/tests/unit/utils/test_paginator_evaluation.py
++++ b/apps/api/plane/tests/unit/utils/test_paginator_evaluation.py
+@@ -136,15 +136,25 @@ def test_previous_cursor_with_unchanged_page_size_is_preserved():
+ 
+ 
+ @pytest.mark.parametrize("transformed", [[], [{"id": 1}], {"items": []}, (), None])
+-def test_callback_output_cardinality_is_not_used_for_page_count(transformed):
++@pytest.mark.parametrize("count_page_in_database", [False, True])
++def test_callback_output_cardinality_is_not_used_for_page_count(transformed, count_page_in_database):
+     rows = _queryset()
+     callback = mock.Mock(return_value=transformed)
+-    response = BasePaginator().paginate(_request(), paginator=_StaticPaginator(_result(rows)), on_results=callback)
++    response = BasePaginator().paginate(
++        _request(),
++        paginator=_StaticPaginator(_result(rows)),
++        on_results=callback,
++        count_page_in_database=count_page_in_database,
++    )
+     callback.assert_called_once_with(rows)
+     assert response.data["results"] is transformed
+     assert response.data["count"] == 4
+-    rows.count.assert_called_once_with()
+-    rows.__len__.assert_not_called()
++    if count_page_in_database:
++        rows.count.assert_called_once_with()
++        rows.__len__.assert_not_called()
++    else:
++        rows.count.assert_not_called()
++        rows.__len__.assert_called_once_with()
+ 
+ 
+ def test_controller_output_does_not_change_source_count():
+@@ -154,6 +164,7 @@ def test_controller_output_does_not_change_source_count():
+         paginator=_StaticPaginator(_result(rows)),
+         on_results=lambda _: [{"id": 1}],
+         controller=lambda _: {"summary": "not a row list"},
++        count_page_in_database=True,
+     )
+     assert response.data["count"] == 4
+     assert response.data["results"] == {"summary": "not a row list"}
+@@ -168,6 +179,7 @@ def test_group_container_count_is_not_confused_with_raw_row_count():
+         paginator=_StaticPaginator(_result(rows)),
+         on_results=lambda _: [{"id": 1}],
+         group_by_field_name="priority",
++        count_page_in_database=True,
+     )
+     assert response.data["count"] == 4
+     assert len(response.data["results"]) == 1
+@@ -177,7 +189,9 @@ def test_group_container_count_is_not_confused_with_raw_row_count():
+ @pytest.mark.parametrize("callback", [None, lambda rows: rows])
+ def test_raw_queryset_response_keeps_the_single_evaluation_path(callback):
+     rows = _queryset()
+-    response = BasePaginator().paginate(_request(), paginator=_StaticPaginator(_result(rows)), on_results=callback)
++    response = BasePaginator().paginate(
++        _request(), paginator=_StaticPaginator(_result(rows)), on_results=callback, count_page_in_database=True
++    )
+     assert response.data["results"] is rows
+     assert response.data["count"] == 4
+     rows.count.assert_not_called()
+@@ -191,6 +205,7 @@ def test_controller_returning_original_queryset_preserves_cache_filling():
+         paginator=_StaticPaginator(_result(rows)),
+         on_results=lambda _: [],
+         controller=lambda _: rows,
++        count_page_in_database=True,
+     )
+     assert response.data["results"] is rows
+     rows.count.assert_not_called()
+@@ -200,7 +215,10 @@ def test_controller_returning_original_queryset_preserves_cache_filling():
+ @pytest.mark.parametrize("rows", [[], [1, 2], (1, 2, 3), "abc"])
+ def test_non_queryset_result_keeps_sequence_length(rows):
+     response = BasePaginator().paginate(
+-        _request(), paginator=_StaticPaginator(_result(rows)), on_results=lambda _: {"filtered": []}
++        _request(),
++        paginator=_StaticPaginator(_result(rows)),
++        on_results=lambda _: {"filtered": []},
++        count_page_in_database=True,
+     )
+     assert response.data["count"] == len(rows)
+ 
+@@ -212,7 +230,10 @@ def test_custom_cursor_result_length_contract_is_preserved():
+ 
+     rows = _queryset()
+     response = BasePaginator().paginate(
+-        _request(), paginator=_StaticPaginator(_result(rows, cls=CustomResult)), on_results=lambda _: []
++        _request(),
++        paginator=_StaticPaginator(_result(rows, cls=CustomResult)),
++        on_results=lambda _: [],
++        count_page_in_database=True,
+     )
+     assert response.data["count"] == 17
+     rows.count.assert_not_called()
+@@ -230,7 +251,9 @@ def test_cursor_result_sequence_contract_itself_is_unchanged():
+ def test_locking_queryset_keeps_its_evaluation_semantics():
+     rows = _queryset()
+     rows.query.select_for_update = True
+-    response = BasePaginator().paginate(_request(), paginator=_StaticPaginator(_result(rows)), on_results=lambda _: [])
++    response = BasePaginator().paginate(
++        _request(), paginator=_StaticPaginator(_result(rows)), on_results=lambda _: [], count_page_in_database=True
++    )
+     assert response.data["count"] == 4
+     rows.count.assert_not_called()
+     rows.__len__.assert_called_once_with()
+@@ -240,7 +263,9 @@ def test_unsliced_queryset_keeps_ordering_sensitive_length_semantics():
+     rows = _queryset()
+     rows.query.is_sliced = False
+     rows.count.return_value = 1
+-    response = BasePaginator().paginate(_request(), paginator=_StaticPaginator(_result(rows)), on_results=lambda _: [])
++    response = BasePaginator().paginate(
++        _request(), paginator=_StaticPaginator(_result(rows)), on_results=lambda _: [], count_page_in_database=True
++    )
+     assert response.data["count"] == 4
+     rows.count.assert_not_called()
+     rows.__len__.assert_called_once_with()
+@@ -252,6 +277,7 @@ def test_controller_without_callback_keeps_existing_cache_behavior():
+         _request(),
+         paginator=_StaticPaginator(_result(rows)),
+         controller=lambda _: {"summary": "controller-only"},
++        count_page_in_database=True,
+     )
+     assert response.data["count"] == 4
+     assert response.data["results"] == {"summary": "controller-only"}
+diff --git a/apps/api/plane/utils/paginator.py b/apps/api/plane/utils/paginator.py
+index 9909da0a6..7561e8ac7 100644
+--- a/apps/api/plane/utils/paginator.py
++++ b/apps/api/plane/utils/paginator.py
+@@ -672,9 +672,16 @@ class BasePaginator:
+         sub_group_by_fields=None,
+         count_filter=None,
+         total_count_queryset=None,
++        count_page_in_database=False,
+         **paginator_kwargs,
+     ):
+-        """Paginate the request"""
++        """Paginate the request.
++
++        Enable count_page_in_database only when callbacks and controllers
++        eagerly build the response without retaining lazy references to the
++        original page. By default, evaluate that page so rendering can reuse
++        its cache, including when it is nested inside another response object.
++        """
+         per_page = self.get_per_page(request, default_per_page, max_per_page)
+         # Convert the cursor value to integer and float from string
+         input_cursor = None
+@@ -727,14 +734,15 @@ class BasePaginator:
+         else:
+             results = results
+ 
+-        # A callback can evaluate a projection without populating the original
+-        # page's cache. Count that page in SQL instead of fetching its models.
++        # An opted-in callback can evaluate a projection without populating
++        # the original page's cache. Count it instead of fetching its models.
+         # Do not count the transformed output: callbacks and controllers may
+         # change its cardinality. Only optimize SQL-sliced pages: counting an
+         # unsliced DISTINCT/GROUP BY query can discard ordering-dependent
+         # columns. Keep custom lengths, row locks and raw-render cache reuse.
+         if (
+-            on_results
++            count_page_in_database
++            and on_results
+             and type(cursor_result) is CursorResult
+             and isinstance(cursor_result.results, QuerySet)
+             and cursor_result.results.query.is_sliced
